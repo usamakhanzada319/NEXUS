@@ -11,14 +11,20 @@ nexus-platform/
 │ │ ├── dashboard/
 │ │ │ └── StatsCard.tsx>
 │ │ ├── teams/
+
 <!-- │ │ │ ├── TeamList.tsx -->
 <!-- │ │ │ └── TeamForm.tsx -->
+
 │ │ └── providers/
+
 <!-- │ │ ├── ProviderList.tsx -->
 <!-- │ │ └── ProviderForm.tsx -->
+
 │ ├── context/
 │ │ ├── AuthContext.tsx>
-<!-- │ │ └── TeamContext.tsx -->
+
+│ │ └── TeamContext.tsx
+
 │ ├── hooks/
 │ │ └── useLocalStorage.ts>
 │ ├── pages/
@@ -31,8 +37,10 @@ nexus-platform/
 │ ├── App.tsx>
 │ ├── main.tsx>
 │ └── index.css>
-├── .env
+
+├── .env -->
 ├── .env.production
+
 ├── package.json>
 ├── tailwind.config.js>
 ├── postcss.config.js>
