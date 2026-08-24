@@ -14,6 +14,9 @@ import {
   mockSpend,
 } from "./mockData";
 
+import { encryptApiKey, decryptApiKey } from '../utils/encryption';
+
+
 // ============================================
 // LOCAL STORAGE HELPERS
 // ============================================
@@ -310,7 +313,20 @@ export const mockApi = {
   getTeamProviders: (teamId: string): TeamProvider[] => {
     try {
       const all = loadFromStorage<TeamProvider[]>("nexus_teamProviders", mockTeamProviders);
-      return all.filter((tp: TeamProvider) => tp.teamId === teamId);
+      const teamProviders = all.filter((tp: TeamProvider) => tp.teamId === teamId);
+
+      //Decrypt API keys before returning
+      return teamProviders.map((tp) => {
+        if (tp.apiKeyEncrypted) {
+          try {
+            const decrypted = decryptApiKey(tp.apiKeyEncrypted);
+            return { ...tp, apiKeyEncrypted: decrypted };
+          } catch {
+            return tp;
+          }
+        }
+        return tp;
+      });
     } catch (error) {
       console.error(`Error fetching team providers for ${teamId}:`, error);
       return [];
@@ -327,6 +343,7 @@ export const mockApi = {
     }
   },
 
+  //  Assign provider to team with encrypted API key
   assignProviderToTeam: (
     teamId: string,
     providerId: string,
@@ -337,22 +354,42 @@ export const mockApi = {
       const existing = all.find(
         (tp: TeamProvider) => tp.teamId === teamId && tp.providerId === providerId,
       );
-      if (existing) {
-        Object.assign(existing, config);
-        saveToStorage("nexus_teamProviders", all);
-        return existing;
+
+      // Encrypt API key if provided
+      let encryptedConfig = { ...config };
+      if (config.apiKeyEncrypted) {
+        encryptedConfig.apiKeyEncrypted = encryptApiKey(config.apiKeyEncrypted);
       }
+
+      if (existing) {
+        Object.assign(existing, encryptedConfig);
+        saveToStorage("nexus_teamProviders", all);
+        //  Return with decrypted key for display
+        const decrypted = { ...existing };
+        if (decrypted.apiKeyEncrypted) {
+          decrypted.apiKeyEncrypted = decryptApiKey(decrypted.apiKeyEncrypted);
+        }
+        return decrypted;
+      }
+
       const newAssignment: TeamProvider = {
         teamId,
         providerId,
         enabled: config.enabled ?? true,
         spendLimit: config.spendLimit ?? 0,
         modelsAssigned: config.modelsAssigned ?? [],
+        apiKeyEncrypted: config.apiKeyEncrypted ? encryptApiKey(config.apiKeyEncrypted) : undefined,
         assignedAt: new Date().toISOString(),
       };
       all.push(newAssignment);
       saveToStorage("nexus_teamProviders", all);
-      return newAssignment;
+
+      //  Return with decrypted key for display
+      const decrypted = { ...newAssignment };
+      if (decrypted.apiKeyEncrypted) {
+        decrypted.apiKeyEncrypted = decryptApiKey(decrypted.apiKeyEncrypted);
+      }
+      return decrypted;
     } catch (error) {
       console.error("Error assigning provider to team:", error);
       throw new Error("Failed to assign provider");
@@ -392,6 +429,7 @@ export const mockApi = {
     }
   },
 
+  //  Update team provider with encrypted API key
   updateTeamProvider: (
     teamId: string,
     providerId: string,
@@ -403,14 +441,28 @@ export const mockApi = {
         (tp: TeamProvider) => tp.teamId === teamId && tp.providerId === providerId,
       );
       if (index === -1) return undefined;
-      all[index] = { ...all[index], ...config };
+
+      //  Encrypt API key if provided
+      let encryptedConfig = { ...config };
+      if (config.apiKeyEncrypted) {
+        encryptedConfig.apiKeyEncrypted = encryptApiKey(config.apiKeyEncrypted);
+      }
+
+      all[index] = { ...all[index], ...encryptedConfig };
       saveToStorage("nexus_teamProviders", all);
-      return all[index];
+
+      //  Return with decrypted key for display
+      const decrypted = { ...all[index] };
+      if (decrypted.apiKeyEncrypted) {
+        decrypted.apiKeyEncrypted = decryptApiKey(decrypted.apiKeyEncrypted);
+      }
+      return decrypted;
     } catch (error) {
       console.error(`Error updating team provider:`, error);
       return undefined;
     }
   },
+
 
   // ==========================================
   // SPEND
