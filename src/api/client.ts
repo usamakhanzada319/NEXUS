@@ -1,8 +1,3 @@
-
-
-
-
-
 import {
   Team,
   Provider,
@@ -13,15 +8,15 @@ import {
 
 import {
   mockUsers,
-  mockProvider,
-  mockSpend,
-  mockTeamProvider,
   mockTeams,
+  mockProviders,
+  mockTeamProviders,
+  mockSpend,
 } from "./mockData";
 
-
+// ============================================
 // LOCAL STORAGE HELPERS
-
+// ============================================
 
 const loadFromStorage = <T>(key: string, defaultData: T): T => {
   try {
@@ -43,7 +38,9 @@ const saveToStorage = <T>(key: string, data: T): void => {
   }
 };
 
+// ============================================
 // INITIALIZE MOCK DATA
+// ============================================
 
 const initMockData = () => {
   if (!localStorage.getItem("nexus_users")) {
@@ -53,10 +50,10 @@ const initMockData = () => {
     saveToStorage("nexus_teams", mockTeams);
   }
   if (!localStorage.getItem("nexus_providers")) {
-    saveToStorage("nexus_providers", mockProvider);
+    saveToStorage("nexus_providers", mockProviders);
   }
   if (!localStorage.getItem("nexus_teamProviders")) {
-    saveToStorage("nexus_teamProviders", mockTeamProvider);
+    saveToStorage("nexus_teamProviders", mockTeamProviders);
   }
   if (!localStorage.getItem("nexus_spend")) {
     saveToStorage("nexus_spend", mockSpend);
@@ -65,15 +62,21 @@ const initMockData = () => {
 
 initMockData();
 
+// ============================================
 // GENERATE ID
+// ============================================
 
 const generateId = () =>
   Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
 
+// ============================================
 // MOCK API
+// ============================================
 
 export const mockApi = {
-  // USER
+  // ==========================================
+  // USERS
+  // ==========================================
 
   getUsers: (): User[] => {
     try {
@@ -147,7 +150,10 @@ export const mockApi = {
     }
   },
 
+  // ==========================================
   // TEAMS
+  // ==========================================
+
   getTeams: (): Team[] => {
     try {
       return loadFromStorage("nexus_teams", mockTeams);
@@ -210,13 +216,16 @@ export const mockApi = {
     }
   },
 
+  // ==========================================
   // PROVIDERS
+  // ==========================================
+
   getProviders: (): Provider[] => {
     try {
-      return loadFromStorage("nexus_providers", mockProvider);
+      return loadFromStorage("nexus_providers", mockProviders);
     } catch (error) {
       console.error("Error fetching providers:", error);
-      return mockProvider;
+      return mockProviders;
     }
   },
 
@@ -290,22 +299,28 @@ export const mockApi = {
     }
   },
 
+  // ==========================================
   // TEAM-PROVIDERS
+  // ==========================================
+
+  // ============================================
+  // TEAM-PROVIDERS (Fixed with Types)
+  // ============================================
 
   getTeamProviders: (teamId: string): TeamProvider[] => {
     try {
-      const all = loadFromStorage("nexus_teamProviders", mockTeamProvider);
-      return all.filter((tp) => tp.teamId === teamId);
+      const all = loadFromStorage<TeamProvider[]>("nexus_teamProviders", mockTeamProviders);
+      return all.filter((tp: TeamProvider) => tp.teamId === teamId);
     } catch (error) {
       console.error(`Error fetching team providers for ${teamId}:`, error);
       return [];
     }
   },
 
-  getProviderTeam: (providerId: string): TeamProvider[] => {
+  getProviderTeams: (providerId: string): TeamProvider[] => {
     try {
-      const all = loadFromStorage("nexus_teamProviders", mockTeamProvider);
-      return all.filter((tp) => tp.providerId === providerId);
+      const all = loadFromStorage<TeamProvider[]>("nexus_teamProviders", mockTeamProviders);
+      return all.filter((tp: TeamProvider) => tp.providerId === providerId);
     } catch (error) {
       console.error(`Error fetching provider teams for ${providerId}:`, error);
       return [];
@@ -318,9 +333,9 @@ export const mockApi = {
     config: Partial<TeamProvider>,
   ): TeamProvider => {
     try {
-      const all = loadFromStorage("nexus_teamProviders", mockTeamProvider);
+      const all = loadFromStorage<TeamProvider[]>("nexus_teamProviders", mockTeamProviders);
       const existing = all.find(
-        (tp) => tp.teamId === teamId && tp.providerId === providerId,
+        (tp: TeamProvider) => tp.teamId === teamId && tp.providerId === providerId,
       );
       if (existing) {
         Object.assign(existing, config);
@@ -346,9 +361,9 @@ export const mockApi = {
 
   removeProviderFromTeam: (teamId: string, providerId: string): boolean => {
     try {
-      let all = loadFromStorage("nexus_teamProviders", mockTeamProvider);
+      let all = loadFromStorage<TeamProvider[]>("nexus_teamProviders", mockTeamProviders);
       all = all.filter(
-        (tp) => !(tp.teamId === teamId && tp.providerId === providerId),
+        (tp: TeamProvider) => !(tp.teamId === teamId && tp.providerId === providerId),
       );
       saveToStorage("nexus_teamProviders", all);
       return true;
@@ -363,9 +378,9 @@ export const mockApi = {
     providerId: string,
   ): TeamProvider | undefined => {
     try {
-      const all = loadFromStorage("nexus_teamProviders", mockTeamProvider);
+      const all = loadFromStorage<TeamProvider[]>("nexus_teamProviders", mockTeamProviders);
       const index = all.findIndex(
-        (tp) => tp.teamId === teamId && tp.providerId === providerId,
+        (tp: TeamProvider) => tp.teamId === teamId && tp.providerId === providerId,
       );
       if (index === -1) return undefined;
       all[index].enabled = !all[index].enabled;
@@ -377,7 +392,29 @@ export const mockApi = {
     }
   },
 
+  updateTeamProvider: (
+    teamId: string,
+    providerId: string,
+    config: Partial<TeamProvider>,
+  ): TeamProvider | undefined => {
+    try {
+      const all = loadFromStorage<TeamProvider[]>("nexus_teamProviders", mockTeamProviders);
+      const index = all.findIndex(
+        (tp: TeamProvider) => tp.teamId === teamId && tp.providerId === providerId,
+      );
+      if (index === -1) return undefined;
+      all[index] = { ...all[index], ...config };
+      saveToStorage("nexus_teamProviders", all);
+      return all[index];
+    } catch (error) {
+      console.error(`Error updating team provider:`, error);
+      return undefined;
+    }
+  },
+
+  // ==========================================
   // SPEND
+  // ==========================================
 
   getSpend: (teamId?: string): Spend[] => {
     try {
@@ -448,7 +485,9 @@ export const mockApi = {
   },
 };
 
+// ============================================
 // API CLIENT (Mock/Real Switch)
+// ============================================
 
 const isMockMode = import.meta.env.VITE_MOCK_MODE !== "false";
 
@@ -458,7 +497,9 @@ const mockify = <T>(fn: () => T): Promise<T> => {
 };
 
 export const apiClient = {
+  // ==========================================
   // USERS
+  // ==========================================
 
   getUsers: (): Promise<User[]> => {
     return isMockMode ? mockify(mockApi.getUsers) : Promise.resolve([]);
@@ -494,7 +535,9 @@ export const apiClient = {
       : Promise.resolve(true);
   },
 
+  // ==========================================
   // TEAMS
+  // ==========================================
 
   getTeams: (): Promise<Team[]> => {
     return isMockMode ? mockify(mockApi.getTeams) : Promise.resolve([]);
@@ -524,7 +567,9 @@ export const apiClient = {
       : Promise.resolve(true);
   },
 
+  // ==========================================
   // PROVIDERS
+  // ==========================================
 
   getProviders: (): Promise<Provider[]> => {
     return isMockMode ? mockify(mockApi.getProviders) : Promise.resolve([]);
@@ -560,7 +605,9 @@ export const apiClient = {
       : Promise.resolve(undefined);
   },
 
+  // ==========================================
   // TEAM-PROVIDERS
+  // ==========================================
 
   getTeamProviders: (teamId: string): Promise<TeamProvider[]> => {
     return isMockMode
@@ -590,7 +637,19 @@ export const apiClient = {
       : Promise.resolve(undefined);
   },
 
+  updateTeamProvider: (
+    teamId: string,
+    providerId: string,
+    config: Partial<TeamProvider>,
+  ): Promise<TeamProvider | undefined> => {
+    return isMockMode
+      ? mockify(() => mockApi.updateTeamProvider(teamId, providerId, config))
+      : Promise.resolve(undefined);
+  },
+
+  // ==========================================
   // SPEND
+  // ==========================================
 
   getSpend: (teamId?: string): Promise<Spend[]> => {
     return isMockMode

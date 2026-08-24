@@ -38,7 +38,7 @@ export const mockUsers: User[] = [
     createdAt: new Date().toISOString(),
   },
 
-// TEAM BETA
+  // TEAM BETA
   {
     id: 'u5',
     name: 'Admin Beta',
@@ -89,7 +89,7 @@ export const mockTeams: Team[] = [
 
 // MOCK PROVIDERS
 
-export const mockProvider: Provider[] = [
+export const mockProviders: Provider[] = [
   {
     id: "p1",
     name: "OpenAI",
@@ -138,7 +138,7 @@ export const mockProvider: Provider[] = [
 
 // MOCK TEAM-PROVIDER ASSIGNMENTS
 
-export const mockTeamProvider: TeamProvider[] = [
+export const mockTeamProviders: TeamProvider[] = [
   {
     teamId: "t1",
     providerId: "p1",

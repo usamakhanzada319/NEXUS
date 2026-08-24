@@ -9,6 +9,7 @@ import { SuperAdminDashboard } from "./pages/SuperAdminDashboard";
 import { Teams } from "./pages/Teams";
 import { Providers } from "./pages/Providers";
 import "./index.css";
+import { AdminTeamProviders } from "./pages/AdminTeamProviders";
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -82,6 +83,7 @@ function App() {
                   element={
                     <RoleBasedRoute allowedRoles={["super_admin"]}>
                       <SuperAdminDashboard />
+                      <AdminTeamProviders />
                     </RoleBasedRoute>
                   }
                 />

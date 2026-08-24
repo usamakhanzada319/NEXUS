@@ -7,6 +7,7 @@ import {
   X,
   Zap,
   Box,
+  Server,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
@@ -22,6 +23,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
     { path: "/", label: "Dashboard", icon: LayoutDashboard },
     { path: "/teams", label: "Teams", icon: Users },
     { path: "/providers", label: "Providers", icon: Box },
+    { path: "/admin/providers", label: "Assign Providers", icon: Server },
   ];
 
   //  Super Admin items (only for super_admin)

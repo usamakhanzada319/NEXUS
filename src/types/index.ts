@@ -88,3 +88,12 @@ export interface DashboardStats {
   activeProviders: number;
   anomalies: number;
 }
+
+
+export interface TeamWithProviders extends Team {
+  providers: (Provider & {
+    enabled: boolean;
+    spendLimit: number;
+    modelsAssigned: string[];
+  })[];
+}
