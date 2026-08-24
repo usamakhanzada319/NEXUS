@@ -1,5 +1,4 @@
 import { NavLink } from "react-router-dom";
-
 import {
   LayoutDashboard,
   Users,
@@ -17,21 +16,30 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
-  const { logout, isAdmin } = useAuth();
+  const { logout, isAdmin, isSuperAdmin } = useAuth();
+
   const navItems = [
     { path: "/", label: "Dashboard", icon: LayoutDashboard },
     { path: "/teams", label: "Teams", icon: Users },
     { path: "/providers", label: "Providers", icon: Box },
   ];
+
+  //  Super Admin items (only for super_admin)
+  const superAdminItems = [{ path: "/super-admin", label: "Super Admin" }];
+
+  //  Admin items (for admin + super_admin)
   const adminItems = [{ path: "/settings", label: "Settings", icon: Settings }];
+
   return (
     <aside
-      className={`fixed top-0 left-0 z-50 h-full w-64 bg-white dark:bg-gray-900 border-r border-border
-         transform transition-transform duration-300 ease-in-out
-          ${isOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 lg:static`}
+      className={`
+        fixed top-0 left-0 z-50 h-full w-64 bg-white dark:bg-gray-900 border-r border-border
+        transform transition-transform duration-300 ease-in-out
+        ${isOpen ? "translate-x-0" : "-translate-x-full"} 
+        lg:translate-x-0 lg:static
+      `}
     >
       {/* Logo */}
-
       <div className="flex items-center justify-between h-16 px-4 border-b border-border">
         <div className="flex items-center gap-2">
           <Zap className="h-6 w-6 text-primary-500" />
@@ -45,9 +53,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
           <X className="h-5 w-5" />
         </button>
       </div>
-      {/* Navigation */}
 
+      {/* Navigation */}
       <nav className="p-4 space-y-1">
+        {/* Main Nav Items */}
         {navItems.map((item) => (
           <NavLink
             key={item.path}
@@ -66,36 +75,58 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
             {item.label}
           </NavLink>
         ))}
-        {/* Admin section */}
 
-        {isAdmin && (
-          <>
-            <div className="pt-2 mt-2 border-t border-border">
-              <p className="px-4 py-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Admin
-              </p>
-              {adminItems.map((item) => (
-                <NavLink
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => setIsOpen(false)}
-                  className={({ isActive }) => `
-                    flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all
-                    ${
-                      isActive
-                        ? "bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400"
-                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                    }
-                  `}
-                >
-                  <item.icon className="h-4 w-4" />
-                  {item.label}
-                </NavLink>
-              ))}
-            </div>
-          </>
+        {/* Super Admin Section */}
+        {isSuperAdmin && (
+          <div className="pt-2 mt-2 border-t border-border">
+            {superAdminItems.map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                onClick={() => setIsOpen(false)}
+                className={({ isActive }) => `
+                  flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all
+                 ${
+                   isActive
+                     ? "bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400"
+                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                 }
+            `}
+              >
+                {item.label}
+              </NavLink>
+            ))}
+          </div>
+        )}
+
+        {/* Admin Section */}
+        {isAdmin && !isSuperAdmin && (
+          <div className="pt-2 mt-2 border-t border-border">
+            <p className="px-4 py-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Admin
+            </p>
+            {adminItems.map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                onClick={() => setIsOpen(false)}
+                className={({ isActive }) => `
+                  flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all
+                  ${
+                    isActive
+                      ? "bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }
+                `}
+              >
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </NavLink>
+            ))}
+          </div>
         )}
       </nav>
+
       {/* Logout */}
       <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border">
         <button

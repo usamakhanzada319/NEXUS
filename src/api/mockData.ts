@@ -1,30 +1,62 @@
 import { Team, User, Provider, TeamProvider, Spend } from "../types";
 // MOCK USER
 export const mockUsers: User[] = [
+  // SUPER ADMIN
   {
-    id: "U1",
-    name: "Super Admin",
-    email: "admin@nexus.com",
-    role: "super_admin",
+    id: 'u1',
+    name: 'Super Admin',
+    email: 'admin@nexus.com',
+    role: 'super_admin',
+    teamId: undefined,
+    createdAt: new Date().toISOString(),
+  },
+
+  // TEAM ALPHA
+
+  {
+    id: 'u2',
+    name: 'Admin Alpha',
+    email: 'admin@alpha.com',
+    role: 'admin',
+    teamId: 't1',
     createdAt: new Date().toISOString(),
   },
   {
-    id: "u2",
-    name: "Team Lead Alpha",
-    email: "lead@alpha.com",
-    role: "team_lead",
-    teamId: "t1",
+    id: 'u3',
+    name: 'Team Lead Alpha',
+    email: 'lead@alpha.com',
+    role: 'team_lead',
+    teamId: 't1',
     createdAt: new Date().toISOString(),
   },
   {
-    id: "u3",
-    name: "Viewer Alpha",
-    email: "viewer@alpha.com",
-    role: "viewer",
-    teamId: "t1",
+    id: 'u4',
+    name: 'Viewer Alpha',
+    email: 'viewer@alpha.com',
+    role: 'viewer',
+    teamId: 't1',
+    createdAt: new Date().toISOString(),
+  },
+
+// TEAM BETA
+  {
+    id: 'u5',
+    name: 'Admin Beta',
+    email: 'admin@beta.com',
+    role: 'admin',
+    teamId: 't2',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'u6',
+    name: 'Team Lead Beta',
+    email: 'lead@beta.com',
+    role: 'team_lead',
+    teamId: 't2',
     createdAt: new Date().toISOString(),
   },
 ];
+
 
 // MOCK TEAMS
 

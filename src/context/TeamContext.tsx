@@ -1,9 +1,10 @@
-import {
+import React, {
   createContext,
   useContext,
   useState,
   useEffect,
   ReactNode,
+  useCallback,
 } from "react";
 import { Team } from "../types";
 import { apiClient } from "../api/client";
@@ -14,6 +15,7 @@ interface TeamContextType {
   teams: Team[];
   isLoading: boolean;
   refreshTeams: () => Promise<void>;
+  switchTeam: (teamId: string) => void;
 }
 
 const TeamContext = createContext<TeamContextType | undefined>(undefined);
@@ -23,9 +25,9 @@ export const TeamProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const [currentTeam, setCurrentTeam] = useState<Team | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const refreshTeams = async () => {
+  const refreshTeams = useCallback(async () => {
     setIsLoading(true);
     try {
       const data = await apiClient.getTeams();
@@ -39,7 +41,29 @@ export const TeamProvider: React.FC<{ children: ReactNode }> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentTeam]);
+
+  const switchTeam = useCallback(
+    (teamId: string) => {
+      const team = teams.find((t) => t.id === teamId);
+      if (team) {
+        setCurrentTeam(team);
+        localStorage.setItem("nexus_current_team", teamId);
+        console.log("Team switched to:", team.name);
+      }
+    },
+    [teams],
+  );
+
+  useEffect(() => {
+    const savedTeamId = localStorage.getItem("nexus_current_team");
+    if (savedTeamId && teams.length > 0) {
+      const team = teams.find((t) => t.id === savedTeamId);
+      if (team) {
+        setCurrentTeam(team);
+      }
+    }
+  }, [teams]);
 
   useEffect(() => {
     refreshTeams();
@@ -47,7 +71,14 @@ export const TeamProvider: React.FC<{ children: ReactNode }> = ({
 
   return (
     <TeamContext.Provider
-      value={{ currentTeam, setCurrentTeam, refreshTeams, isLoading, teams }}
+      value={{
+        currentTeam,
+        setCurrentTeam,
+        teams,
+        isLoading,
+        refreshTeams,
+        switchTeam,
+      }}
     >
       {children}
     </TeamContext.Provider>

@@ -3,7 +3,6 @@ import { Plus, Edit, Trash2, Users } from "lucide-react";
 import { apiClient } from "../api/client";
 import { Team } from "../types";
 import { useAuth } from "../context/AuthContext";
-import { xAxisDefaultProps } from "recharts/types/cartesian/XAxis";
 
 export const Teams: React.FC = () => {
   const { isAdmin, user } = useAuth();
@@ -177,21 +176,6 @@ export const Teams: React.FC = () => {
                   className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
-              {/* status */}
-
-              {/* <div>
-                <label className="block text-sm font-medium mb-1">Status</label>
-                <select
-                  name="status"
-                  defaultValue={editingTeam?.status || "active"}
-                  className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  required
-                >
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                  <option value="pending">Pending</option>
-                </select>
-              </div> */}
 
               <div className="flex items-center gap-3 pt-2">
                 <button

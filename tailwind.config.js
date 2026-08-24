@@ -29,15 +29,29 @@ export default {
           800: '#1e40af',
           900: '#1e3a5f'
         },
+        //  Dark mode colors
+        background: {
+          DEFAULT: '#f8fafc',
+          dark: '#0f172a'
+        },
+        foreground: {
+          DEFAULT: '#0f172a',
+          dark: '#f1f5f9'
+        },
         muted: {
           DEFAULT: '#f1f5f9',
-          foreground: '#64748b'
+          foreground: '#64748b',
+          dark: '#334155',
+          'dark-foreground': '#94a3b8'
         },
-        border: '#e2e8f0',
-        background: '#f8fafc',
-        foreground: '#0f172a',
-        card: '#ffffff',
-        'card-foreground': '#0f172a'
+        border: {
+          DEFAULT: '#e2e8f0',
+          dark: '#334155'
+        },
+        card: {
+          DEFAULT: '#ffffff',
+          dark: '#1e293b'
+        }
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif']

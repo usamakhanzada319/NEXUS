@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import React, { FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Zap } from "lucide-react";
@@ -16,9 +16,9 @@ export const Login: React.FC = () => {
     setError("");
     setIsLoading(true);
     try {
-      const success = await login(email, password);
-      if (success) {
-        navigate("/");
+      const result = await login(email, password);
+      if (result.success) {
+        navigate(result.redirectTo || "/");
       } else {
         setError("Invalid email or password");
       }
@@ -33,7 +33,6 @@ export const Login: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md space-y-6">
         {/* Logo */}
-
         <div className="text-center">
           <div className="flex items-center justify-center gap-2">
             <Zap className="h-8 w-8 text-primary-500" />
@@ -43,13 +42,13 @@ export const Login: React.FC = () => {
             AI Ops · Connect · Control · Scale
           </p>
         </div>
-        {/* Cards */}
+
+        {/* Card */}
         <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-border p-6">
           <h2 className="text-xl font-semibold text-center mb-6">
             Sign in to NEXUS
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/*email  */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium mb-1">
                 Email Address
@@ -64,7 +63,7 @@ export const Login: React.FC = () => {
                 required
               />
             </div>
-            {/* password */}
+
             <div>
               <label
                 htmlFor="password"
@@ -78,25 +77,27 @@ export const Login: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-4 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary-500"
                 required
               />
             </div>
-            {/* Error */}
+
             {error && (
               <div className="p-3 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 rounded-lg">
                 {error}
               </div>
             )}
+
             <button
               type="submit"
+              disabled={isLoading}
               className="w-full py-2.5 bg-primary-500 text-white rounded-lg font-medium hover:bg-primary-600 transition-colors disabled:opacity-50"
             >
-              {isLoading ? "Signing in..." : "sign in"}
+              {isLoading ? "Signing in..." : "Sign In"}
             </button>
           </form>
         </div>
-        {/* Footer */}
+
         <p className="text-xs text-center text-muted-foreground">
           Login · Use any email and password
         </p>
