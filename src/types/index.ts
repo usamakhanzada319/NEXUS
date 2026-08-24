@@ -97,3 +97,9 @@ export interface TeamWithProviders extends Team {
     modelsAssigned: string[];
   })[];
 }
+export type TeamProviderWithProvider = Provider & {
+  enabled: boolean;
+  spendLimit: number;
+  modelsAssigned: string[];
+  apiKeyEncrypted?: string;
+};
