@@ -103,3 +103,52 @@ export type TeamProviderWithProvider = Provider & {
   modelsAssigned: string[];
   apiKeyEncrypted?: string;
 };
+
+
+// AUDIT LOG TYPES
+
+
+export type AuditAction =
+  | "login"
+  | "logout"
+  | 'create_team'
+  | 'update_team'
+  | 'delete_team'
+  | 'create_provider'
+  | "update_provider"
+  | "delete_provider"
+  | 'assign_provider'
+  | 'remove_provider'
+  | 'toggle_provider'
+  | 'update_provider_config'
+  | 'api_call'
+  | 'spend_alert';
+
+
+export interface AuditLog {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  action: AuditAction;
+  details: {
+    [key: string]: any
+  }
+  ip?: string;
+  userAgent?: string;
+  createdAt: string;
+}
+
+
+// NOTIFICATION TYPES
+export type NotificationType = 'success' | 'error' | 'warning' | 'info';
+
+export interface Notification {
+  id: string;
+  type: NotificationType;
+  message: string;
+  duration?: number;
+  createdAt: string;
+}
+
+

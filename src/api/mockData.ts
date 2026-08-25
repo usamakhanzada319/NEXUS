@@ -1,4 +1,4 @@
-import { Team, User, Provider, TeamProvider, Spend } from "../types";
+import { Team, User, Provider, TeamProvider, Spend, AuditLog } from "../types";
 // MOCK USER
 export const mockUsers: User[] = [
   // SUPER ADMIN
@@ -227,3 +227,78 @@ export const mockSpend: Spend[] = [
     createdAt: "2026-08-11T11:20:00Z",
   },
 ];
+
+
+export const mockAuditLog: AuditLog[] = [
+  {
+    id: "a1",
+    userId: "u1",
+    userName: 'Super Admin',
+    userEmail: 'admin@nexus.com',
+    action: "login",
+    details: { ip: '192.168.1.1', device: 'Chrome on Windows' },
+    createdAt: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
+  },
+
+  {
+    id: "a2",
+    userId: "u1",
+    userName: 'Super Admin',
+    userEmail: 'admin@nexus.com',
+    action: "assign_provider",
+    details: { team: 'Alpha Squad', provider: 'OpenAI', enabled: true },
+    createdAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+  },
+
+
+  {
+    id: "a3",
+    userId: "u3",
+    userName: 'Team Lead Alpha',
+    userEmail: 'lead@alpha.com',
+    action: "api_call",
+    details: { model: 'gpt-4', tokens: 1200, provider: 'OpenAI' },
+    createdAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+  },
+
+
+  {
+    id: "a4",
+    userId: "u1",
+    userName: 'Super Admin',
+    userEmail: 'admin@nexus.com',
+    action: "create_team",
+    details: { team: 'Gamma Group' },
+    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'a5',
+    userId: 'u3',
+    userName: 'Team Lead Alpha',
+    userEmail: 'lead@alpha.com',
+    action: 'spend_alert',
+    details: { team: 'Alpha Squad', provider: 'OpenAI', spend: 4800, limit: 5000 },
+    createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+  },
+
+  {
+    id: 'a6',
+    userId: 'u2',
+    userName: 'Admin Alpha',
+    userEmail: 'admin@alpha.com',
+    action: 'toggle_provider',
+    details: { team: 'Alpha Squad', provider: 'Anthropic', enabled: false },
+    createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(), 
+  },
+
+  {
+    id: 'a7',
+    userId: 'u5',
+    userName: 'Admin Beta',
+    userEmail: 'admin@beta.com',
+    action: 'update_provider_config',
+    details: { team: 'Beta Team', provider: 'OpenAI', spendLimit: 5000 },
+    createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), 
+  },
+
+]
