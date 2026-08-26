@@ -229,7 +229,7 @@ export const mockSpend: Spend[] = [
 ];
 
 
-export const mockAuditLog: AuditLog[] = [
+export const mockAuditLogs: AuditLog[] = [
   {
     id: "a1",
     userId: "u1",
@@ -288,7 +288,7 @@ export const mockAuditLog: AuditLog[] = [
     userEmail: 'admin@alpha.com',
     action: 'toggle_provider',
     details: { team: 'Alpha Squad', provider: 'Anthropic', enabled: false },
-    createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(), 
+    createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
   },
 
   {
@@ -298,7 +298,7 @@ export const mockAuditLog: AuditLog[] = [
     userEmail: 'admin@beta.com',
     action: 'update_provider_config',
     details: { team: 'Beta Team', provider: 'OpenAI', spendLimit: 5000 },
-    createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), 
+    createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
   },
 
 ]

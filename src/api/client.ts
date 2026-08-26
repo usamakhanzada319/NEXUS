@@ -4,6 +4,7 @@ import {
   TeamProvider,
   Spend,
   User,
+  AuditLog, AuditAction, Notification
 } from "../types";
 
 import {
@@ -12,14 +13,13 @@ import {
   mockProviders,
   mockTeamProviders,
   mockSpend,
+  mockAuditLogs
 } from "./mockData";
 
 import { encryptApiKey, decryptApiKey } from '../utils/encryption';
 
 
-// ============================================
 // LOCAL STORAGE HELPERS
-// ============================================
 
 const loadFromStorage = <T>(key: string, defaultData: T): T => {
   try {
@@ -41,9 +41,7 @@ const saveToStorage = <T>(key: string, data: T): void => {
   }
 };
 
-// ============================================
 // INITIALIZE MOCK DATA
-// ============================================
 
 const initMockData = () => {
   if (!localStorage.getItem("nexus_users")) {
@@ -65,21 +63,21 @@ const initMockData = () => {
 
 initMockData();
 
-// ============================================
+
 // GENERATE ID
-// ============================================
+
 
 const generateId = () =>
   Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
 
-// ============================================
+
 // MOCK API
-// ============================================
+
 
 export const mockApi = {
-  // ==========================================
+
   // USERS
-  // ==========================================
+
 
   getUsers: (): User[] => {
     try {
@@ -153,9 +151,9 @@ export const mockApi = {
     }
   },
 
-  // ==========================================
+
   // TEAMS
-  // ==========================================
+
 
   getTeams: (): Team[] => {
     try {
@@ -219,9 +217,7 @@ export const mockApi = {
     }
   },
 
-  // ==========================================
   // PROVIDERS
-  // ==========================================
 
   getProviders: (): Provider[] => {
     try {
@@ -302,13 +298,8 @@ export const mockApi = {
     }
   },
 
-  // ==========================================
   // TEAM-PROVIDERS
-  // ==========================================
 
-  // ============================================
-  // TEAM-PROVIDERS (Fixed with Types)
-  // ============================================
 
   getTeamProviders: (teamId: string): TeamProvider[] => {
     try {
@@ -464,9 +455,7 @@ export const mockApi = {
   },
 
 
-  // ==========================================
   // SPEND
-  // ==========================================
 
   getSpend: (teamId?: string): Spend[] => {
     try {
@@ -535,23 +524,100 @@ export const mockApi = {
       throw new Error("Failed to add spend");
     }
   },
+
+
+
+  // AUDIT LOG METHODS
+
+  // Get all audit logs
+
+  getAuditLogs: (): AuditLog[] => {
+    try {
+      return loadFromStorage<AuditLog[]>("nexus_auditLogs", mockAuditLogs)
+
+    } catch (error) {
+      console.error("Error fetching audit logs:", error);
+      return mockAuditLogs;
+    }
+  },
+
+  // Get audit logs by user
+
+  getAuditLogsByUsers: (userId: string): AuditLog[] => {
+    try {
+      const all = mockApi.getAuditLogs();
+      return all.filter((log) => log.userId === userId);
+    } catch (error) {
+      console.error(`Error fetching audit logs for user ${userId}:`, error);
+      return [];
+    }
+  },
+
+  // Get audit logs by action
+  getAuditLogsByAction: (action: AuditAction): AuditLog[] => {
+    try {
+      const all = mockApi.getAuditLogs();
+      return all.filter((log) => log.action === action);
+    } catch (error) {
+      console.error(`Error fetching audit logs for action ${action}:`, error);
+      return [];
+    }
+  },
+
+
+  // Add audit log
+  addAuditLog: (log: Omit<AuditLog, 'id' | 'createdAt'>): AuditLog => {
+    try {
+      const all = mockApi.getAuditLogs();
+      const newLog: AuditLog = {
+        ...log,
+        id: generateId(),
+        createdAt: new Date().toISOString(),
+      };
+      all.unshift(newLog);
+      saveToStorage("nexus_auditLogs", all);
+      return newLog;
+    } catch (error) {
+      console.error("Error adding audit log:", error);
+      throw new Error("Failed to add audit log");
+    }
+  },
+
+
+  getRecentAuditLogs: (limit: number = 5): AuditLog[] => {
+    try {
+      const all = mockApi.getAuditLogs();
+      return all.slice(0, limit);
+    } catch (error) {
+      console.error(`Error fetching recent audit logs:`, error);
+      return [];
+    }
+  }
 };
 
-// ============================================
+
+
+
+// MOCK AUDIT LOGS — INITIALIZATION
+
+
+if (!localStorage.getItem("nexus_auditLogs")) {
+  saveToStorage("nexus_auditLogs", mockAuditLogs)
+}
+
+
+
 // API CLIENT (Mock/Real Switch)
-// ============================================
 
 const isMockMode = import.meta.env.VITE_MOCK_MODE !== "false";
 
-// ✅ Helper: Wraps mock API calls in Promise
+// Wraps mock API calls in Promise
 const mockify = <T>(fn: () => T): Promise<T> => {
   return Promise.resolve(fn());
 };
 
 export const apiClient = {
-  // ==========================================
   // USERS
-  // ==========================================
 
   getUsers: (): Promise<User[]> => {
     return isMockMode ? mockify(mockApi.getUsers) : Promise.resolve([]);
@@ -587,9 +653,7 @@ export const apiClient = {
       : Promise.resolve(true);
   },
 
-  // ==========================================
   // TEAMS
-  // ==========================================
 
   getTeams: (): Promise<Team[]> => {
     return isMockMode ? mockify(mockApi.getTeams) : Promise.resolve([]);
@@ -619,9 +683,7 @@ export const apiClient = {
       : Promise.resolve(true);
   },
 
-  // ==========================================
   // PROVIDERS
-  // ==========================================
 
   getProviders: (): Promise<Provider[]> => {
     return isMockMode ? mockify(mockApi.getProviders) : Promise.resolve([]);
@@ -657,9 +719,7 @@ export const apiClient = {
       : Promise.resolve(undefined);
   },
 
-  // ==========================================
   // TEAM-PROVIDERS
-  // ==========================================
 
   getTeamProviders: (teamId: string): Promise<TeamProvider[]> => {
     return isMockMode
@@ -699,9 +759,7 @@ export const apiClient = {
       : Promise.resolve(undefined);
   },
 
-  // ==========================================
   // SPEND
-  // ==========================================
 
   getSpend: (teamId?: string): Promise<Spend[]> => {
     return isMockMode
@@ -722,4 +780,38 @@ export const apiClient = {
   },
 
   isMockMode: (): boolean => isMockMode,
+
+
+
+
+  // AUDIT LOGS
+  getAuditLogs: (): Promise<AuditLog[]> => {
+    return isMockMode
+      ? mockify(() => mockApi.getAuditLogs())
+      : Promise.resolve([]);
+  },
+
+
+  getAuditLogByUser: (userId: string): Promise<AuditLog[]> => {
+    return isMockMode ? mockify(() => mockApi.getAuditLogsByUsers(userId)) : Promise.resolve([])
+  },
+
+  getAuditLogsByAction: (action: AuditAction): Promise<AuditLog[]> => {
+    return isMockMode ? mockify(() => mockApi.getAuditLogsByAction(action)) : Promise.resolve([])
+  },
+
+
+  addAuditLog: (log: Omit<AuditLog, "id" | "createdAt">): Promise<AuditLog> => {
+    return isMockMode ? mockify(() => mockApi.addAuditLog(log))
+      : Promise.reject(new Error("API not configured"))
+  },
+
+  getRecentAuditLog: (limit: number = 5): Promise<AuditLog[]> => {
+
+    return isMockMode ? mockify(() => mockApi.getRecentAuditLogs(limit)) : Promise.resolve([])
+
+  }
+
 };
+
+
