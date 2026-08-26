@@ -2,9 +2,20 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useTeam } from "../context/TeamContext";
 import { apiClient } from "../api/client";
-import { Team, Provider, TeamProvider } from "../types";
+import { Team, Provider, TeamProvider, AuditLog } from "../types";
 import { TeamProviderCard } from "../components/admin/TeamProviderCard";
-import { Users, Server, Search, X } from "lucide-react";
+import {
+  Users,
+  Server,
+  Search,
+  X,
+  Clock,
+  LogIn,
+  LogOut,
+  Key,
+  AlertTriangle,
+  Activity,
+} from "lucide-react";
 
 export const AdminTeamProviders: React.FC = () => {
   const { isAdmin } = useAuth();

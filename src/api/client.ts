@@ -806,7 +806,7 @@ export const apiClient = {
       : Promise.reject(new Error("API not configured"))
   },
 
-  getRecentAuditLog: (limit: number = 5): Promise<AuditLog[]> => {
+  getRecentAuditLogs: (limit: number = 5): Promise<AuditLog[]> => {
 
     return isMockMode ? mockify(() => mockApi.getRecentAuditLogs(limit)) : Promise.resolve([])
 
