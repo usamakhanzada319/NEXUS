@@ -303,7 +303,6 @@ export const Dashboard: React.FC = () => {
                     <p className="text-sm font-medium text-gray-900 dark:text-white">
                       {log.userName}
                       <span className="font-normal text-muted-foreground">
-                        {" "}
                         {formatAction(log.action)}
                       </span>
                     </p>

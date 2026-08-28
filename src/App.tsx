@@ -10,6 +10,12 @@ import { Teams } from "./pages/Teams";
 import { Providers } from "./pages/Providers";
 import "./index.css";
 import { AdminTeamProviders } from "./pages/AdminTeamProviders";
+import {
+  NotificationProvider,
+  useNotification,
+} from "./context/NotificationContext";
+import { AuditLogs } from "./pages/AuditLogs";
+import { Toast } from "./components/common/Toast";
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -52,6 +58,19 @@ const RoleBasedRoute: React.FC<{
   return <>{children}</>;
 };
 
+const ToastContainer: React.FC = () => {
+  const { notifications, removeNotification } = useNotification();
+  return (
+    <div className="fixed top-4 right-4 z-50 space-y-2 max-w-md w-full pointer-events-none">
+      {notifications.map((notification) => (
+        <div key={notification.id} className="pointer-events-auto">
+          <Toast notification={notification} onRemove={removeNotification} />
+        </div>
+      ))}
+    </div>
+  );
+};
+
 function App() {
   useEffect(() => {
     const saved = localStorage.getItem("darkMode");
@@ -67,35 +86,53 @@ function App() {
       <BrowserRouter>
         <AuthProvider>
           <TeamProvider>
-            <Routes>
-              <Route path="/login" element={<Login />} />
+            <NotificationProvider>
+              <Routes>
+                <Route path="/login" element={<Login />} />
 
-              <Route
-                element={
-                  <ProtectedRoute>
-                    <Layout />
-                  </ProtectedRoute>
-                }
-              >
-                {/* Super Admin Only */}
                 <Route
-                  path="/super-admin"
                   element={
-                    <RoleBasedRoute allowedRoles={["super_admin"]}>
-                      <SuperAdminDashboard />
-                      <AdminTeamProviders />
-                    </RoleBasedRoute>
+                    <ProtectedRoute>
+                      <Layout />
+                    </ProtectedRoute>
                   }
-                />
+                >
+                  {/* Super Admin Only */}
+                  <Route
+                    path="/super-admin"
+                    element={
+                      <RoleBasedRoute allowedRoles={["super_admin"]}>
+                        <SuperAdminDashboard />
+                      </RoleBasedRoute>
+                    }
+                  />
 
-                {/* Admin + Super Admin */}
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/teams" element={<Teams />} />
-                <Route path="/providers" element={<Providers />} />
-              </Route>
+                  {/* Admin + Super Admin */}
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/teams" element={<Teams />} />
+                  <Route path="/providers" element={<Providers />} />
+                  <Route
+                    path="/admin/providers"
+                    element={
+                      <RoleBasedRoute allowedRoles={["admin", "super_admin"]}>
+                        <AdminTeamProviders />
+                      </RoleBasedRoute>
+                    }
+                  />
 
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+                  <Route
+                    path="/audit-logs"
+                    element={
+                      <RoleBasedRoute allowedRoles={["admin", "super_admin"]}>
+                        <AuditLogs />
+                      </RoleBasedRoute>
+                    }
+                  />
+                </Route>
+
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </NotificationProvider>
           </TeamProvider>
         </AuthProvider>
       </BrowserRouter>
