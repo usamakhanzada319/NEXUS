@@ -1,4 +1,4 @@
-import { Team, User, Provider, TeamProvider, Spend, AuditLog } from "../types";
+import { Team, User, Provider, TeamProvider, Spend, AuditLog, APICallLog } from "../types";
 // MOCK USER
 export const mockUsers: User[] = [
   // SUPER ADMIN
@@ -301,4 +301,116 @@ export const mockAuditLogs: AuditLog[] = [
     createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
   },
 
+]
+
+
+export const mockAPICallLogs: APICallLog[] = [
+  {
+    id: 'c1',
+    teamId: 't1',
+    teamName: 'Alpha Squad',
+    providerId: 'p1',
+    providerName: 'OpenAI',
+    model: 'gpt-4',
+    inputTokens: 450,
+    outputTokens: 120,
+    totalTokens: 570,
+    cost: 0.045,
+    responseTime: 890,
+    status: 'success',
+    createdAt: new Date(Date.now() - 2 * 60 * 1000).toISOString(), // 2 min ago
+  },
+
+  {
+    id: 'c2',
+    teamId: 't1',
+    teamName: 'Alpha Squad',
+    providerId: 'p1',
+    providerName: 'OpenAI',
+    model: 'gpt-3.5-turbo',
+    inputTokens: 300,
+    outputTokens: 80,
+    totalTokens: 380,
+    cost: 0.012,
+    responseTime: 450,
+    status: 'success',
+    createdAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(), // 15 min ago
+  },
+
+  {
+    id: 'c3',
+    teamId: 't2',
+    teamName: 'Beta Team',
+    providerId: 'p1',
+    providerName: 'OpenAI',
+    model: 'gpt-4',
+    inputTokens: 1200,
+    outputTokens: 350,
+    totalTokens: 1550,
+    cost: 0.120,
+    responseTime: 1200,
+    status: 'success',
+    createdAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(), // 1 hour ago
+  },
+  {
+    id: 'c4',
+    teamId: 't1',
+    teamName: 'Alpha Squad',
+    providerId: 'p2',
+    providerName: 'Anthropic',
+    model: 'claude-3-opus',
+    inputTokens: 800,
+    outputTokens: 200,
+    totalTokens: 1000,
+    cost: 0.150,
+    responseTime: 1500,
+    status: 'failed',
+    error: 'Rate limit exceeded',
+    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+  },
+  {
+    id: 'c5',
+    teamId: 't2',
+    teamName: 'Beta Team',
+    providerId: 'p3',
+    providerName: 'Google Gemini',
+    model: 'gemini-pro',
+    inputTokens: 200,
+    outputTokens: 50,
+    totalTokens: 250,
+    cost: 0.008,
+    responseTime: 600,
+    status: 'success',
+    createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(), // 3 hours ago
+  },
+  {
+    id: 'c6',
+    teamId: 't3',
+    teamName: 'Gamma Group',
+    providerId: 'p1',
+    providerName: 'OpenAI',
+    model: 'gpt-4o',
+    inputTokens: 2000,
+    outputTokens: 500,
+    totalTokens: 2500,
+    cost: 0.250,
+    responseTime: 1800,
+    status: 'success',
+    createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(), // 4 hours ago
+  },
+  {
+    id: 'c7',
+    teamId: 't1',
+    teamName: 'Alpha Squad',
+    providerId: 'p1',
+    providerName: 'OpenAI',
+    model: 'gpt-4',
+    inputTokens: 150,
+    outputTokens: 40,
+    totalTokens: 190,
+    cost: 0.015,
+    responseTime: 350,
+    status: 'success',
+    createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5 hours ago
+  },
 ]

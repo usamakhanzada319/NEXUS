@@ -4,7 +4,7 @@ import {
   TeamProvider,
   Spend,
   User,
-  AuditLog, AuditAction, Notification
+  AuditLog, AuditAction, Notification, APICallLog, AnalyticsStats, ProviderAnalytics, ModelAnalytics
 } from "../types";
 
 import {
@@ -13,7 +13,8 @@ import {
   mockProviders,
   mockTeamProviders,
   mockSpend,
-  mockAuditLogs
+  mockAuditLogs,
+  mockAPICallLogs
 } from "./mockData";
 
 import { encryptApiKey, decryptApiKey } from '../utils/encryption';
@@ -592,17 +593,191 @@ export const mockApi = {
       console.error(`Error fetching recent audit logs:`, error);
       return [];
     }
+  },
+
+  // Get all API call logs
+
+  getAPICallLogs: (): APICallLog[] => {
+    try {
+      return loadFromStorage<APICallLog[]>("nexus_apiCallLogs", mockAPICallLogs)
+    } catch (error) {
+      console.error("Error fetching API call logs:", error);
+      return mockAPICallLogs;
+
+    }
+  },
+
+  // Get API call logs by team
+
+  getAPICallLogsByTeam: (teamId: string): APICallLog[] => {
+    try {
+      const all = mockApi.getAPICallLogs();
+      return all.filter((log) => log.teamId === teamId)
+
+    } catch (error) {
+      console.error(`Error fetching API call logs for team ${teamId}:`, error);
+      return [];
+    }
+  },
+
+  // Get API call logs by provider
+  getAPICallLogsByProvider: (providerId: string): APICallLog[] => {
+    try {
+      const all = mockApi.getAPICallLogs();
+      return all.filter((log) => log.providerId === providerId)
+    } catch (error) {
+      console.error(`Error fetching API call logs for provider ${providerId}:`, error);
+      return [];
+    }
+  },
+
+  // Add API call log
+  addAPICallLog: (log: Omit<APICallLog, "id" | "createdAt">): APICallLog => {
+    try {
+      const all = mockApi.getAPICallLogs();
+      const newLog = {
+        ...log,
+        id: generateId(),
+        createdAt: new Date().toISOString(),
+      };
+
+      all.unshift(newLog)
+      saveToStorage("nexus_apiCallLogs", all)
+      return newLog;
+    } catch (error) {
+      console.error("Error adding API call log:", error);
+      throw new Error("Failed to add API call log");
+    }
+  },
+
+  // Get analytics stats
+  getAnalyticsStats: (): AnalyticsStats => {
+    try {
+
+      const logs = mockApi.getAPICallLogs();
+      const totalCalls = logs.length;
+      const totalTokens = logs.reduce((sum, log) => sum + log.totalTokens, 0)
+      const totalCost = logs.reduce((sum, log) => sum + log.cost, 0);
+      const avgResponseTime = logs.length > 0 ? logs.reduce((sum, log) => sum + log.responseTime, 0) / logs.length : 0
+      const successRate = logs.length > 0 ? (logs.filter((log) => log.status === "success").length / logs.length) * 100 : 0;
+
+      return {
+        totalCalls,
+        totalTokens,
+        totalCost,
+        avgResponseTime,
+        successRate
+      }
+    } catch (error) {
+      console.error("Error fetching analytics stats:", error);
+
+      return {
+        totalCalls: 0,
+        totalTokens: 0,
+        totalCost: 0,
+        avgResponseTime: 0,
+        successRate: 0,
+      }
+    }
+
+  },
+
+  // Get provider analytics
+
+  getProviderAnalytics: (): ProviderAnalytics[] => {
+    try {
+      const logs = mockApi.getAPICallLogs();
+      const providerMap = new Map<string, ProviderAnalytics>();
+
+      logs.forEach((log) => {
+        if (!providerMap.has(log.providerId)) {
+          providerMap.set(log.providerId, {
+            providerId: log.providerId,
+            providerName: log.providerName,
+            calls: 0,
+            totalTokens: 0,
+            totalCost: 0,
+            avgResponseTime: 0,
+            successRate: 0,
+          });
+        }
+
+        const data = providerMap.get(log.providerId)!;
+        data.calls += 1;
+        data.totalTokens += log.totalTokens;
+        data.totalCost += log.cost;
+        data.avgResponseTime += log.responseTime;
+      });
+
+      // Calculate averages
+      providerMap.forEach((data) => {
+        data.avgResponseTime = data.calls > 0 ? data.avgResponseTime / data.calls : 0;
+        const providerLogs = logs.filter((log) => log.providerId === data.providerId);
+        data.successRate = providerLogs.length > 0
+          ? (providerLogs.filter((log) => log.status === 'success').length / providerLogs.length) * 100
+          : 0;
+      });
+
+      return Array.from(providerMap.values());
+    } catch (error) {
+      console.error("Error fetching provider analytics:", error);
+      return [];
+    }
+  },
+
+  // Get model analytics
+
+  getModelAnalytics: (): ModelAnalytics[] => {
+    try {
+
+      const logs = mockApi.getAPICallLogs()
+      const modelMap = new Map<string, ModelAnalytics>();
+      logs.forEach((log) => {
+        if (!modelMap.has(log.model)) {
+          modelMap.set(log.model, {
+            model: log.model,
+            calls: 0,
+            totalTokens: 0,
+            totalCost: 0,
+            avgResponseTime: 0,
+          })
+        }
+
+        const data = modelMap.get(log.model)!;
+        data.calls += 1;
+        data.totalTokens += log.totalTokens;
+        data.totalCost += log.cost
+        data.avgResponseTime += log.responseTime
+      });
+      // Calculate averages
+
+      modelMap.forEach((data) => {
+        data.avgResponseTime = data.calls > 0 ? data.avgResponseTime / data.calls : 0
+      })
+      return Array.from(modelMap.values());
+
+    } catch (error) {
+      console.error("Error fetching model analytics:", error);
+      return [];
+    }
   }
 };
 
 
 
 
-// MOCK AUDIT LOGS — INITIALIZATION
+// Mock Audit Logs
 
 
 if (!localStorage.getItem("nexus_auditLogs")) {
   saveToStorage("nexus_auditLogs", mockAuditLogs)
+}
+
+// Mock Call Logs
+
+
+if (!localStorage.getItem("nexus_apiCallLogs")) {
+  saveToStorage("nexus_apiCallLogs", mockAPICallLogs)
 }
 
 
@@ -810,8 +985,63 @@ export const apiClient = {
 
     return isMockMode ? mockify(() => mockApi.getRecentAuditLogs(limit)) : Promise.resolve([])
 
-  }
+  },
+
+
+
+  // API Calls Logs
+
+  getAPICallLogs: (): Promise<APICallLog[]> => {
+    return isMockMode
+      ? mockify(() => mockApi.getAPICallLogs())
+      : Promise.resolve([])
+  },
+
+  getAPICallLogsByTeam: (teamId: string): Promise<APICallLog[]> => {
+    return isMockMode
+      ? mockify(() => mockApi.getAPICallLogsByTeam(teamId))
+      : Promise.resolve([])
+
+  },
+
+  getAPICallLogsByProvider: (providerId: string): Promise<APICallLog[]> => {
+    return isMockMode
+      ? mockify(() => mockApi.getAPICallLogsByProvider(providerId))
+      : Promise.resolve([]);
+  },
+
+  addAPICallLogs: (log: Omit<APICallLog, "id" | "createdAt">): Promise<APICallLog> => {
+    return isMockMode
+      ? mockify(() => mockApi.addAPICallLog(log))
+      : Promise.reject(new Error("API not configured"));
+
+  },
+
+  getAnalyticsStats: (): Promise<AnalyticsStats> => {
+    return isMockMode
+      ? mockify(() => mockApi.getAnalyticsStats())
+      : Promise.resolve({
+        totalCalls: 0,
+        totalTokens: 0,
+        totalCost: 0,
+        avgResponseTime: 0,
+        successRate: 0,
+      });
+  },
+
+  getProviderAnalytics: (): Promise<ProviderAnalytics[]> => {
+    return isMockMode
+      ? mockify(() => mockApi.getProviderAnalytics())
+      : Promise.resolve([]);
+  },
+
+  getModelAnalytics: (): Promise<ModelAnalytics[]> => {
+    return isMockMode
+      ? mockify(() => mockApi.getModelAnalytics())
+      : Promise.resolve([]);
+  },
 
 };
+
 
 

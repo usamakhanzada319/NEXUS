@@ -79,7 +79,56 @@ export interface ApiResponse<T> {
 
 // API call Logs
 
+export interface APICallLog {
+  id: string;
+  teamId: string;
+  teamName: string;
+  providerId: string;
+  providerName: string;
+  model: string;
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+  cost: number;
+  responseTime: number; // in ms
+  status: 'success' | 'failed' | 'pending';
+  error?: string;
+  createdAt: string;
+}
 
+// Analytics Types
+
+export interface AnalyticsStats {
+  totalCalls: number;
+  totalTokens: number;
+  totalCost: number;
+  avgResponseTime: number;
+  successRate: number;
+
+}
+
+
+// Provider Analytics
+
+export interface ProviderAnalytics {
+  providerId: string;
+  providerName: string;
+  calls: number;
+  totalTokens: number;
+  totalCost: number;
+  avgResponseTime: number;
+  successRate: number;
+}
+
+// Model Analytics
+
+export interface ModelAnalytics {
+  model: string;
+  calls: number;
+  totalTokens: number;
+  totalCost: number;
+  avgResponseTime: number;
+}
 
 
 // Dashboard Stats
