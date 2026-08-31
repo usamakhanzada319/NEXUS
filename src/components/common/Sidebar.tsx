@@ -9,7 +9,7 @@ import {
   Box,
   Server,
   Clock,
-  Crown,
+  BarChart,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
@@ -26,14 +26,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
     { path: "/teams", label: "Teams", icon: Users },
     { path: "/providers", label: "Providers", icon: Box },
     { path: "/admin/providers", label: "Assign Providers", icon: Server },
+    { path: "/analytics", label: "Analytics", icon: BarChart },
   ];
 
-  // ✅ Super Admin items
-  const superAdminItems = [
-    { path: "/super-admin", label: "Super Admin", icon: Crown },
-  ];
+  //  Super Admin items
+  const superAdminItems = [{ path: "/super-admin", label: "Super Admin" }];
 
-  // ✅ Admin items
+  // Admin items
   const adminItems = [
     { path: "/audit-logs", label: "Audit Logs", icon: Clock },
     { path: "/settings", label: "Settings", icon: Settings },
@@ -85,13 +84,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
           </NavLink>
         ))}
 
-        {/* ✅ Super Admin Section */}
+        {/*  Super Admin Section */}
         {isSuperAdmin && (
           <div className="pt-2 mt-2 border-t border-border">
-            <p className="px-4 py-1 text-xs font-medium text-yellow-500 uppercase tracking-wider flex items-center gap-1">
-              <Crown className="h-3 w-3" />
-              Super Admin
-            </p>
             {superAdminItems.map((item) => (
               <NavLink
                 key={item.path}
@@ -101,19 +96,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
                   flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all
                   ${
                     isActive
-                      ? "bg-yellow-50 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400"
+                      ? "bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   }
                 `}
               >
-                <Crown className="h-4 w-4" />
                 {item.label}
               </NavLink>
             ))}
           </div>
         )}
 
-        {/* ✅ Admin Section */}
+        {/* Admin Section */}
         {isAdmin && !isSuperAdmin && (
           <div className="pt-2 mt-2 border-t border-border">
             <p className="px-4 py-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">

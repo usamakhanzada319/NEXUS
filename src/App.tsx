@@ -16,6 +16,7 @@ import {
 } from "./context/NotificationContext";
 import { AuditLogs } from "./pages/AuditLogs";
 import { Toast } from "./components/common/Toast";
+import { Analytics } from "./pages/Analytics";
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -116,6 +117,14 @@ function App() {
                     element={
                       <RoleBasedRoute allowedRoles={["admin", "super_admin"]}>
                         <AdminTeamProviders />
+                      </RoleBasedRoute>
+                    }
+                  />
+                  <Route
+                    path="/analytics"
+                    element={
+                      <RoleBasedRoute allowedRoles={["admin", "super_admin"]}>
+                        <Analytics />
                       </RoleBasedRoute>
                     }
                   />

@@ -12,7 +12,6 @@ import {
   ChevronRight,
   TrendingUp,
   CheckCircle,
-  
 } from "lucide-react";
 
 interface TeamSpendSummary {
