@@ -1,4 +1,4 @@
-import { Team, User, Provider, TeamProvider, Spend, AuditLog, APICallLog } from "../types";
+import { Team, User, Provider, TeamProvider, Spend, AuditLog, APICallLog, TeamBudget, BudgetAlert } from "../types";
 // MOCK USER
 export const mockUsers: User[] = [
   // SUPER ADMIN
@@ -413,4 +413,62 @@ export const mockAPICallLogs: APICallLog[] = [
     status: 'success',
     createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5 hours ago
   },
+]
+
+
+export const mockBudgets: TeamBudget[] = [
+  {
+    teamId: "t1",
+    teamName: "Alpha Squad",
+    monthlyLimit: 5000,
+    dailyLimit: 500,
+    currentMonthSpend: 4800,
+    currentDaySpend: 420,
+    softLimitPercent: 80,
+    hardLimitPercent: 100,
+    isSoftLimitReached: true,
+    isHardLimitReached: false,
+    lastUpdated: new Date().toISOString()
+  },
+  {
+    teamId: 't2',
+    teamName: 'Beta Team',
+    monthlyLimit: 3000,
+    dailyLimit: 300,
+    currentMonthSpend: 2100,
+    currentDaySpend: 180,
+    softLimitPercent: 80,
+    hardLimitPercent: 100,
+    isSoftLimitReached: false,
+    isHardLimitReached: false,
+    lastUpdated: new Date().toISOString(),
+  },
+  {
+    teamId: 't3',
+    teamName: 'Gamma Group',
+    monthlyLimit: 2000,
+    dailyLimit: 200,
+    currentMonthSpend: 1200,
+    currentDaySpend: 150,
+    softLimitPercent: 80,
+    hardLimitPercent: 100,
+    isSoftLimitReached: false,
+    isHardLimitReached: false,
+    lastUpdated: new Date().toISOString(),
+  },
+]
+
+// Mock Budget Alerts
+
+
+export const mockBudgetAlerts: BudgetAlert[] = [
+  {
+    id: "b1",
+    teamId: "t1",
+    teamName: "Alpha Squad",
+    type: "soft",
+    message: 'Alpha Squad has reached 96% of monthly budget ($4,800 / $5,000)',
+    triggeredAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+    isResolved: false
+  }
 ]

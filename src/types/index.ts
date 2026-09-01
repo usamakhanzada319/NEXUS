@@ -205,3 +205,30 @@ export interface Notification {
 }
 
 
+// Budget Types
+
+export interface TeamBudget {
+  teamId: string
+  teamName: string
+  monthlyLimit: number
+  dailyLimit: number
+  currentMonthSpend: number;
+  currentDaySpend: number;
+  softLimitPercent: number;
+  hardLimitPercent: number;
+  isSoftLimitReached: boolean;
+  isHardLimitReached: boolean;
+  lastUpdated: string;
+}
+
+
+export interface BudgetAlert {
+  id: string
+  teamId: string
+  teamName: string
+  type: "soft" | "hard" | "daily"
+  message: string;
+  triggeredAt: string;
+  isResolved: boolean;
+  resolvedAt?: string;
+}

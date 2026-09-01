@@ -4,7 +4,7 @@ import {
   TeamProvider,
   Spend,
   User,
-  AuditLog, AuditAction, Notification, APICallLog, AnalyticsStats, ProviderAnalytics, ModelAnalytics
+  AuditLog, AuditAction, Notification, APICallLog, AnalyticsStats, ProviderAnalytics, ModelAnalytics, BudgetAlert, TeamBudget
 } from "../types";
 
 import {
@@ -14,7 +14,9 @@ import {
   mockTeamProviders,
   mockSpend,
   mockAuditLogs,
-  mockAPICallLogs
+  mockAPICallLogs,
+  mockBudgetAlerts,
+  mockBudgets
 } from "./mockData";
 
 import { encryptApiKey, decryptApiKey } from '../utils/encryption';
@@ -59,6 +61,20 @@ const initMockData = () => {
   }
   if (!localStorage.getItem("nexus_spend")) {
     saveToStorage("nexus_spend", mockSpend);
+  }
+  if (!localStorage.getItem("nexus_budgets")) {
+    saveToStorage("nexus_budgets", mockBudgets);
+  }
+  if (!localStorage.getItem("nexus_budgetAlerts")) {
+    saveToStorage("nexus_budgetAlerts", mockBudgetAlerts);
+  }
+
+  if (!localStorage.getItem("nexus_auditLogs")) {
+    saveToStorage("nexus_auditLogs", mockAuditLogs)
+  }
+  // Mock Call Logs
+  if (!localStorage.getItem("nexus_apiCallLogs")) {
+    saveToStorage("nexus_apiCallLogs", mockAPICallLogs)
   }
 };
 
@@ -760,26 +776,187 @@ export const mockApi = {
       console.error("Error fetching model analytics:", error);
       return [];
     }
+  },
+
+  //Budget Method
+
+
+  // Get all budgets
+  getBudgets: (): TeamBudget[] => {
+    try {
+      return loadFromStorage<TeamBudget[]>("nexus_budgets", mockBudgets)
+    } catch (error) {
+      console.error("Error fetching budgets:", error);
+      return mockBudgets
+    }
+  },
+
+  // Get budget by team
+
+  getBudgetByTeam: (teamId: string): TeamBudget | undefined => {
+    try {
+      const budgets = mockApi.getBudgets();
+      return budgets.find((b) => b.teamId === teamId)
+
+    } catch (error) {
+      console.error(`Error fetching budget for team ${teamId}:`, error);
+      return undefined;
+
+    }
+  },
+  // Update budget
+
+  updateBudget: (teamId: string, update: Partial<TeamBudget>): TeamBudget | undefined => {
+    try {
+      const budgets = mockApi.getBudgets();
+      const index = budgets.findIndex((b) => b.teamId === teamId);
+      if (index === -1) return undefined
+      budgets[index] = {
+        ...budgets[index],
+        ...update,
+        lastUpdated: new Date().toISOString()
+      }
+      saveToStorage("nexus_budgets", budgets);
+
+      // Check if soft/hard limit reached
+      const budget = budgets[index];
+      const spendPercent = (budget.currentMonthSpend / budget.monthlyLimit) * 100
+
+      if (spendPercent >= budget.hardLimitPercent) {
+        budget.isHardLimitReached = true;
+        budget.isSoftLimitReached = false;
+
+        // Add hard limit alert
+
+        mockApi.addBudgetAlert({
+          teamId: budget.teamId,
+          teamName: budget.teamName,
+          type: "hard",
+          message: `${budget.teamName} has reached 100% of monthly budget! API calls blocked.`,
+          isResolved: false,
+
+        });
+      } else if (spendPercent >= budget.softLimitPercent) {
+        budget.isSoftLimitReached = true;
+        budget.isHardLimitReached = false;
+        // Add soft limit alert
+        mockApi.addBudgetAlert({
+          teamId: budget.teamId,
+          teamName: budget.teamName,
+          type: 'soft',
+          message: `${budget.teamName} has reached ${Math.round(spendPercent)}% of monthly budget (${budget.currentMonthSpend} / ${budget.monthlyLimit})`,
+          isResolved: false,
+        });
+      } else {
+        budget.isSoftLimitReached = false;
+        budget.isHardLimitReached = false;
+      }
+      saveToStorage("nexus_budgets", budgets);
+      return budgets[index]
+
+    } catch (error) {
+
+      console.error(`Error updating budget for team ${teamId}:`, error);
+      return undefined;
+
+    }
+
+
+  },
+
+  // Reset monthly budget (called on 1st of month)
+
+  resetMonthlyBudgets: (): TeamBudget[] => {
+
+    try {
+
+      const budgets = mockApi.getBudgets()
+      budgets.forEach((budget) => {
+        budget.currentMonthSpend = 0;
+        budget.currentDaySpend = 0;
+        budget.isSoftLimitReached = false
+        budget.isHardLimitReached = false
+        budget.lastUpdated = new Date().toISOString();
+
+      })
+      saveToStorage("nexus_budgets", budgets);
+      return budgets;
+
+    } catch (error) {
+      console.error("Error resetting budgets:", error);
+      return [];
+    }
+  },
+
+  // Budget Alert Method
+
+  getBudgetAlerts: (): BudgetAlert[] => {
+
+    try {
+      return loadFromStorage<BudgetAlert[]>("nexus_budgetAlerts", mockBudgetAlerts)
+
+    } catch (error) {
+      console.error("Error fetching budget alerts:", error);
+      return mockBudgetAlerts;
+    }
+  },
+
+  // Get unresolved budget alerts
+
+  getUnresolvedBudgetAlerts: (): BudgetAlert[] => {
+
+    try {
+      const alerts = mockApi.getBudgetAlerts();
+      return alerts.filter((a) => !a.isResolved)
+
+    } catch (error) {
+      console.error("Error fetching unresolved budget alerts:", error);
+      return [];
+
+    }
+  },
+
+  // Add budget alert
+  addBudgetAlert: (alert: Omit<BudgetAlert, "id" | "triggeredAt">): BudgetAlert => {
+    try {
+      const alerts = mockApi.getBudgetAlerts();
+      const newAlert = {
+        ...alert,
+        id: generateId(),
+        triggeredAt: new Date().toISOString(),
+      }
+      alerts.unshift(newAlert);
+      saveToStorage("nexus_budgetAlerts", alerts);
+      return newAlert;
+    } catch (error) {
+      console.error("Error adding budget alert:", error);
+      throw new Error("Failed to add budget alert");
+    }
+
+  },
+
+  // Resolve budget alert
+
+  resolveBudgetAlert: (id: string): BudgetAlert | undefined => {
+    try {
+      const alerts = mockApi.getBudgetAlerts();
+      const index = alerts.findIndex((a) => a.id === id)
+      if (index === -1) return undefined
+      alerts[index].isResolved = true;
+      alerts[index].resolvedAt = new Date().toISOString()
+      saveToStorage("nexus_budgetAlerts", alerts);
+      return alerts[index];
+
+    } catch (error) {
+      console.error(`Error resolving budget alert ${id}:`, error);
+      return undefined;
+
+    }
+
+
   }
+
 };
-
-
-
-
-// Mock Audit Logs
-
-
-if (!localStorage.getItem("nexus_auditLogs")) {
-  saveToStorage("nexus_auditLogs", mockAuditLogs)
-}
-
-// Mock Call Logs
-
-
-if (!localStorage.getItem("nexus_apiCallLogs")) {
-  saveToStorage("nexus_apiCallLogs", mockAPICallLogs)
-}
-
 
 
 // API CLIENT (Mock/Real Switch)
@@ -1039,6 +1216,50 @@ export const apiClient = {
     return isMockMode
       ? mockify(() => mockApi.getModelAnalytics())
       : Promise.resolve([]);
+  },
+
+  // BUDGETS
+
+  getBudgets: (): Promise<TeamBudget[]> => {
+    return isMockMode
+      ? mockify(() => mockApi.getBudgets())
+      : Promise.resolve([]);
+  },
+
+  getBudgetByTeam: (teamId: string): Promise<TeamBudget | undefined> => {
+    return isMockMode
+      ? mockify(() => mockApi.getBudgetByTeam(teamId))
+      : Promise.resolve(undefined);
+  },
+
+  updateBudget: (teamId: string, update: Partial<TeamBudget>): Promise<TeamBudget | undefined> => {
+    return isMockMode
+      ? mockify(() => mockApi.updateBudget(teamId, update))
+      : Promise.resolve(undefined)
+  },
+
+  resetMonthlyBudgets: (): Promise<TeamBudget[]> => {
+    return isMockMode
+      ? mockify(() => mockApi.resetMonthlyBudgets())
+      : Promise.resolve([]);
+  },
+
+  getBudgetAlerts: (): Promise<BudgetAlert[]> => {
+    return isMockMode
+      ? mockify(() => mockApi.getBudgetAlerts())
+      : Promise.resolve([]);
+  },
+
+  getUnresolvedBudgetAlerts: (): Promise<BudgetAlert[]> => {
+    return isMockMode
+      ? mockify(() => mockApi.getUnresolvedBudgetAlerts())
+      : Promise.resolve([]);
+  },
+
+  resolveBudgetAlert: (id: string): Promise<BudgetAlert | undefined> => {
+    return isMockMode
+      ? mockify(() => mockApi.resolveBudgetAlert(id))
+      : Promise.resolve(undefined);
   },
 
 };
