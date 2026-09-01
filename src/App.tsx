@@ -18,6 +18,7 @@ import { AuditLogs } from "./pages/AuditLogs";
 import { Toast } from "./components/common/Toast";
 import { Analytics } from "./pages/Analytics";
 import { Budget } from "./pages/Budget";
+import { BudgetProvider } from "./context/BudgetContext";
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -88,70 +89,72 @@ function App() {
       <BrowserRouter>
         <AuthProvider>
           <TeamProvider>
-            <NotificationProvider>
-              <Routes>
-                <Route path="/login" element={<Login />} />
-
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <Layout />
-                    </ProtectedRoute>
-                  }
-                >
-                  {/* Super Admin Only */}
-                  <Route
-                    path="/super-admin"
-                    element={
-                      <RoleBasedRoute allowedRoles={["super_admin"]}>
-                        <SuperAdminDashboard />
-                      </RoleBasedRoute>
-                    }
-                  />
-
-                  {/* Admin + Super Admin */}
-                  <Route path="/" element={<Dashboard />} />
-                  <Route path="/teams" element={<Teams />} />
-                  <Route path="/providers" element={<Providers />} />
-                  <Route
-                    path="/admin/providers"
-                    element={
-                      <RoleBasedRoute allowedRoles={["admin", "super_admin"]}>
-                        <AdminTeamProviders />
-                      </RoleBasedRoute>
-                    }
-                  />
-                  <Route
-                    path="/analytics"
-                    element={
-                      <RoleBasedRoute allowedRoles={["admin", "super_admin"]}>
-                        <Analytics />
-                      </RoleBasedRoute>
-                    }
-                  />
+            <BudgetProvider>
+              <NotificationProvider>
+                <Routes>
+                  <Route path="/login" element={<Login />} />
 
                   <Route
-                    path="/audit-logs"
                     element={
-                      <RoleBasedRoute allowedRoles={["admin", "super_admin"]}>
-                        <AuditLogs />
-                      </RoleBasedRoute>
+                      <ProtectedRoute>
+                        <Layout />
+                      </ProtectedRoute>
                     }
-                  />
+                  >
+                    {/* Super Admin Only */}
+                    <Route
+                      path="/super-admin"
+                      element={
+                        <RoleBasedRoute allowedRoles={["super_admin"]}>
+                          <SuperAdminDashboard />
+                        </RoleBasedRoute>
+                      }
+                    />
 
-                  <Route
-                    path="/budget"
-                    element={
-                      <RoleBasedRoute allowedRoles={["admin", "super_admin"]}>
-                        <Budget />
-                      </RoleBasedRoute>
-                    }
-                  />
-                </Route>
+                    {/* Admin + Super Admin */}
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/teams" element={<Teams />} />
+                    <Route path="/providers" element={<Providers />} />
+                    <Route
+                      path="/admin/providers"
+                      element={
+                        <RoleBasedRoute allowedRoles={["admin", "super_admin"]}>
+                          <AdminTeamProviders />
+                        </RoleBasedRoute>
+                      }
+                    />
+                    <Route
+                      path="/analytics"
+                      element={
+                        <RoleBasedRoute allowedRoles={["admin", "super_admin"]}>
+                          <Analytics />
+                        </RoleBasedRoute>
+                      }
+                    />
 
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </NotificationProvider>
+                    <Route
+                      path="/audit-logs"
+                      element={
+                        <RoleBasedRoute allowedRoles={["admin", "super_admin"]}>
+                          <AuditLogs />
+                        </RoleBasedRoute>
+                      }
+                    />
+
+                    <Route
+                      path="/budget"
+                      element={
+                        <RoleBasedRoute allowedRoles={["admin", "super_admin"]}>
+                          <Budget />
+                        </RoleBasedRoute>
+                      }
+                    />
+                  </Route>
+
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </NotificationProvider>
+            </BudgetProvider>
           </TeamProvider>
         </AuthProvider>
       </BrowserRouter>
