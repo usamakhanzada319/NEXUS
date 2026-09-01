@@ -1,4 +1,4 @@
-import { Team, User, Provider, TeamProvider, Spend, AuditLog, APICallLog, TeamBudget, BudgetAlert } from "../types";
+import { Team, User, Provider, TeamProvider, Spend, AuditLog, APICallLog, TeamBudget, BudgetAlert, ProviderFallbackConfig, ProviderHealth } from "../types";
 // MOCK USER
 export const mockUsers: User[] = [
   // SUPER ADMIN
@@ -471,4 +471,93 @@ export const mockBudgetAlerts: BudgetAlert[] = [
     triggeredAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
     isResolved: false
   }
+]
+
+// Provider Health Data
+
+export const mockProviderHealth: ProviderHealth[] = [
+  {
+    providerId: 'p1',
+    providerName: 'OpenAI',
+    status: 'healthy',
+    lastCheck: new Date().toISOString(),
+    responseTime: 450,
+    successRate: 99.5,
+    errorRate: 0.5,
+    uptime: 99.99,
+    isCircuitOpen: false,
+    failoverCount: 0,
+  },
+  {
+    providerId: 'p2',
+    providerName: 'Anthropic',
+    status: 'degraded',
+    lastCheck: new Date().toISOString(),
+    responseTime: 1200,
+    successRate: 92.0,
+    errorRate: 8.0,
+    uptime: 97.50,
+    isCircuitOpen: false,
+    failoverCount: 0,
+  },
+
+  {
+    providerId: 'p3',
+    providerName: 'Google Gemini',
+    status: 'unhealthy',
+    lastCheck: new Date().toISOString(),
+    responseTime: 2100,
+    successRate: 75.0,
+    errorRate: 25.0,
+    uptime: 89.00,
+    isCircuitOpen: true,
+    failoverCount: 12,
+  },
+  {
+    providerId: 'p4',
+    providerName: 'Mistral AI',
+    status: 'healthy',
+    lastCheck: new Date().toISOString(),
+    responseTime: 600,
+    successRate: 98.5,
+    errorRate: 1.5,
+    uptime: 99.50,
+    isCircuitOpen: false,
+    failoverCount: 0,
+  },
+]
+
+// Mock Fallback Configurations
+
+export const mockFallbackConfigs: ProviderFallbackConfig[] = [
+  {
+    providerId: 'p1',
+    fallbackProviderId: 'p4',
+    enabled: true,
+    triggerConditions: {
+      maxResponseTime: 2000,
+      minSuccessRate: 95,
+      consecutiveFailures: 3,
+    },
+  },
+  {
+    providerId: 'p2',
+    fallbackProviderId: 'p1',
+    enabled: true,
+    triggerConditions: {
+      maxResponseTime: 3000,
+      minSuccessRate: 90,
+      consecutiveFailures: 3,
+    },
+  },
+  {
+    providerId: 'p3',
+    fallbackProviderId: 'p2',
+    enabled: false,
+    triggerConditions: {
+      maxResponseTime: 4000,
+      minSuccessRate: 85,
+      consecutiveFailures: 3,
+    },
+  },
 ]

@@ -4,7 +4,17 @@ import {
   TeamProvider,
   Spend,
   User,
-  AuditLog, AuditAction, Notification, APICallLog, AnalyticsStats, ProviderAnalytics, ModelAnalytics, BudgetAlert, TeamBudget
+  AuditLog,
+  AuditAction,
+  APICallLog,
+  AnalyticsStats,
+  ProviderAnalytics,
+  ModelAnalytics,
+  BudgetAlert,
+  TeamBudget,
+  ProviderHealth,
+  ProviderFallbackConfig,
+  HealthCheckResult
 } from "../types";
 
 import {
@@ -16,7 +26,9 @@ import {
   mockAuditLogs,
   mockAPICallLogs,
   mockBudgetAlerts,
-  mockBudgets
+  mockBudgets,
+  mockFallbackConfigs,
+  mockProviderHealth
 } from "./mockData";
 
 import { encryptApiKey, decryptApiKey } from '../utils/encryption';
@@ -72,9 +84,15 @@ const initMockData = () => {
   if (!localStorage.getItem("nexus_auditLogs")) {
     saveToStorage("nexus_auditLogs", mockAuditLogs)
   }
-  // Mock Call Logs
   if (!localStorage.getItem("nexus_apiCallLogs")) {
     saveToStorage("nexus_apiCallLogs", mockAPICallLogs)
+  }
+
+  if (!localStorage.getItem("nexus_providerHealth")) {
+    saveToStorage("nexus_providerHealth", mockProviderHealth);
+  }
+  if (!localStorage.getItem("nexus_fallbackConfigs")) {
+    saveToStorage("nexus_fallbackConfigs", mockFallbackConfigs);
   }
 };
 
@@ -954,8 +972,159 @@ export const mockApi = {
     }
 
 
-  }
+  },
 
+
+  // Get all provider health
+  getProviderHealth: (): ProviderHealth[] => {
+    try {
+      return loadFromStorage<ProviderHealth[]>("nexus_providerHealth", mockProviderHealth);
+    } catch (error) {
+      console.error("Error fetching provider health:", error);
+      return mockProviderHealth;
+
+    }
+  },
+
+  // Get Provider Health By Id
+
+  getProviderHealthById: (providerId: string): ProviderHealth | undefined => {
+    try {
+      const health = mockApi.getProviderHealth();
+      return health.find((h) => h.providerId === providerId);
+    } catch (error) {
+      console.error(`Error fetching health for provider ${providerId}:`, error);
+      return undefined;
+    }
+
+  },
+
+  // update Provider health
+
+  updateProviderHealth: (providerId: string, updates: Partial<ProviderHealth>): ProviderHealth | undefined => {
+    try {
+      const health = mockApi.getProviderHealth();
+      const index = health.findIndex((h) => h.providerId === providerId);
+      if (index === -1) return undefined;
+      health[index] = {
+        ...health[index],
+        ...updates,
+        lastCheck: new Date().toISOString()
+      }
+      saveToStorage("nexus_providerHealth", health);
+      return health[index];
+
+    } catch (error) {
+      console.error(`Error updating health for provider ${providerId}:`, error);
+      return undefined;
+    }
+  },
+
+  // Run health check on provider
+
+  runHealthCheck: (providerId: string): HealthCheckResult => {
+    try {
+
+      const success = Math.random() > 0.1;
+      const responseTime = Math.floor(Math.random() * 1000) + 200;
+      const result: HealthCheckResult = {
+        providerId,
+        status: success ? "healthy" : "unhealthy",
+        responseTime,
+        success,
+        checkedAt: new Date().toISOString(),
+
+      }
+
+      if (!success) {
+        result.error = 'Health check failed';
+      }
+
+      // Update provider health
+      const health = mockApi.getProviderHealth();
+      const index = health.findIndex((h) => h.providerId === providerId);
+      if (index !== -1) {
+        health[index].lastCheck = result.checkedAt;
+        health[index].responseTime = responseTime;
+        health[index].status = result.status;
+
+        const currentSuccess = health[index].successRate;
+        health[index].successRate = success ? Math.min(currentSuccess + 0.1, 100) : Math.max(currentSuccess - 0.5, 0)
+        health[index].errorRate = 100 - health[index].successRate;
+        if (!success) {
+          health[index].failoverCount = (health[index].failoverCount || 0) + 1
+          if (health[index].failoverCount >= 5) {
+            health[index].isCircuitOpen = true;
+            health[index].status = 'unhealthy';
+          }
+        } else {
+          health[index].failoverCount = Math.max(0, (health[index].failoverCount || 0) - 1);
+          if (health[index].failoverCount < 3) {
+            health[index].isCircuitOpen = false;
+          }
+        }
+        saveToStorage("nexus_providerHealth", health);
+
+
+      }
+      return result;
+
+    } catch (error) {
+      console.error(`Error running health check for provider ${providerId}:`, error);
+      return {
+        providerId,
+        status: 'unhealthy',
+        responseTime: 0,
+        success: false,
+        error: 'Health check failed',
+        checkedAt: new Date().toISOString(),
+      };
+
+    }
+  },
+
+  // Get fallback configs
+  getFallbackConfigs: (): ProviderFallbackConfig[] => {
+    try {
+      return loadFromStorage<ProviderFallbackConfig[]>("nexus_fallbackConfigs", mockFallbackConfigs);
+    } catch (error) {
+      console.error("Error fetching fallback configs:", error);
+      return mockFallbackConfigs;
+    }
+  },
+
+  // Update fallback config
+  updateFallbackConfig: (providerId: string, config: Partial<ProviderFallbackConfig>): ProviderFallbackConfig | undefined => {
+    try {
+      const configs = mockApi.getFallbackConfigs();
+      const index = configs.findIndex((c) => c.providerId === providerId);
+      if (index === -1) return undefined;
+      configs[index] = { ...configs[index], ...config };
+      saveToStorage("nexus_fallbackConfigs", configs);
+      return configs[index];
+    } catch (error) {
+      console.error(`Error updating fallback config for provider ${providerId}:`, error);
+      return undefined;
+    }
+  },
+
+
+  // Get fallback provider for a provider
+  getFallbackProvider: (providerId: string): string | undefined => {
+    try {
+      const configs = mockApi.getFallbackConfigs();
+      const config = configs.find((c) => c.providerId === providerId);
+      if (config && config.enabled) {
+        return config.fallbackProviderId;
+      }
+      return undefined;
+    } catch (error) {
+      console.error(`Error getting fallback provider for ${providerId}:`, error);
+      return undefined;
+    }
+
+
+  }
 };
 
 
@@ -1259,6 +1428,52 @@ export const apiClient = {
   resolveBudgetAlert: (id: string): Promise<BudgetAlert | undefined> => {
     return isMockMode
       ? mockify(() => mockApi.resolveBudgetAlert(id))
+      : Promise.resolve(undefined);
+  },
+
+
+
+  // PROVIDER HEALTH
+
+  getProviderHealth: (): Promise<ProviderHealth[]> => {
+    return isMockMode
+      ? mockify(() => mockApi.getProviderHealth())
+      : Promise.resolve([]);
+  },
+
+  getProviderHealthById: (providerId: string): Promise<ProviderHealth | undefined> => {
+    return isMockMode
+      ? mockify(() => mockApi.getProviderHealthById(providerId))
+      : Promise.resolve(undefined);
+  },
+
+  updateProviderHealth: (providerId: string, updates: Partial<ProviderHealth>): Promise<ProviderHealth | undefined> => {
+    return isMockMode
+      ? mockify(() => mockApi.updateProviderHealth(providerId, updates))
+      : Promise.resolve(undefined);
+  },
+
+  runHealthCheck: (providerId: string): Promise<HealthCheckResult> => {
+    return isMockMode
+      ? mockify(() => mockApi.runHealthCheck(providerId))
+      : Promise.reject(new Error("API not configured"));
+  },
+
+  getFallbackConfigs: (): Promise<ProviderFallbackConfig[]> => {
+    return isMockMode
+      ? mockify(() => mockApi.getFallbackConfigs())
+      : Promise.resolve([]);
+  },
+
+  updateFallbackConfig: (providerId: string, config: Partial<ProviderFallbackConfig>): Promise<ProviderFallbackConfig | undefined> => {
+    return isMockMode
+      ? mockify(() => mockApi.updateFallbackConfig(providerId, config))
+      : Promise.resolve(undefined);
+  },
+
+  getFallbackProvider: (providerId: string): Promise<string | undefined> => {
+    return isMockMode
+      ? mockify(() => mockApi.getFallbackProvider(providerId))
       : Promise.resolve(undefined);
   },
 

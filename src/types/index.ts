@@ -232,3 +232,42 @@ export interface BudgetAlert {
   isResolved: boolean;
   resolvedAt?: string;
 }
+
+
+// Provider status & Health Types
+
+export type ProviderStatus = "healthy" | "degraded" | "unhealthy" | "unknown";
+
+export interface ProviderHealth {
+  providerId: string;
+  providerName: string;
+  status: ProviderStatus;
+  lastCheck: string;
+  responseTime: number;
+  successRate: number;
+  errorRate: number;
+  uptime: number;
+  isCircuitOpen: boolean;
+  failoverCount: number;
+}
+
+
+export interface ProviderFallbackConfig {
+  providerId: string;
+  fallbackProviderId: string;
+  enabled: boolean;
+  triggerConditions: {
+    maxResponseTime: number;
+    minSuccessRate: number;
+    consecutiveFailures: number;
+  };
+}
+
+export interface HealthCheckResult {
+  providerId: string;
+  status: ProviderStatus;
+  responseTime: number;
+  success: boolean;
+  error?: string;
+  checkedAt: string;
+} 
