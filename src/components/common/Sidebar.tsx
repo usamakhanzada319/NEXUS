@@ -11,6 +11,7 @@ import {
   Clock,
   BarChart,
   DollarSign,
+  Activity,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
@@ -29,6 +30,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
     { path: "/admin/providers", label: "Assign Providers", icon: Server },
     { path: "/analytics", label: "Analytics", icon: BarChart },
     { path: "/budget", label: "Budget", icon: DollarSign },
+    { path: "/provider-health", label: "Provider Health", icon: Activity },
   ];
 
   //  Super Admin items

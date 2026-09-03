@@ -19,6 +19,7 @@ import { Toast } from "./components/common/Toast";
 import { Analytics } from "./pages/Analytics";
 import { Budget } from "./pages/Budget";
 import { BudgetProvider } from "./context/BudgetContext";
+import { ProviderHealth } from "./pages/ProviderHealth";
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -149,10 +150,19 @@ function App() {
                         </RoleBasedRoute>
                       }
                     />
+                    <Route
+                      path="/provider-health"
+                      element={
+                        <RoleBasedRoute allowedRoles={["admin", "super_admin"]}>
+                          <ProviderHealth />
+                        </RoleBasedRoute>
+                      }
+                    />
                   </Route>
 
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
+                <ToastContainer />
               </NotificationProvider>
             </BudgetProvider>
           </TeamProvider>

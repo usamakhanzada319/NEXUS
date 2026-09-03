@@ -15,7 +15,7 @@ interface useProviderHealthReturn {
 }
 
 
-export const useProviderHealthReturn = (): useProviderHealthReturn => {
+export const useProviderHealth = (): useProviderHealthReturn => {
     const { addNotification } = useNotification();
     const [healthData, setHealthData] = useState<ProviderHealth[]>([]);
     const [fallbackConfigs, setFallbackConfigs] = useState<ProviderFallbackConfig[]>([]);
