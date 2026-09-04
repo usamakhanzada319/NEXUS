@@ -112,7 +112,7 @@ const initMockData = () => {
     saveToStorage("nexus_loginHistory", mockLoginHistory)
   }
 
-  if (!localStorage.getItem("nexus_loginHistory")) {
+  if (!localStorage.getItem("nexus_sessions")) {
     saveToStorage("nexus_sessions", mockSessions);
 
   }
@@ -368,10 +368,10 @@ export const mockApi = {
 
       //Decrypt API keys before returning
       return teamProviders.map((tp) => {
+        const result = { ...tp }
         if (tp.apiKeyEncrypted) {
           try {
-            const decrypted = decryptApiKey(tp.apiKeyEncrypted);
-            return { ...tp, apiKeyEncrypted: decrypted };
+            result.apiKeyEncrypted = decryptApiKey(tp.apiKeyEncrypted)
           } catch {
             return tp;
           }
@@ -1074,7 +1074,7 @@ export const mockApi = {
         health[index].status = result.status;
 
         const currentSuccess = health[index].successRate;
-        health[index].successRate = success ? Math.min(currentSuccess + 0.1, 100) : Math.max(currentSuccess - 0.5, 0)
+        health[index].successRate = success ? Math.min(currentSuccess + 1, 100) : Math.max(currentSuccess - 2, 0)
         health[index].errorRate = 100 - health[index].successRate;
         if (!success) {
           health[index].failoverCount = (health[index].failoverCount || 0) + 1
