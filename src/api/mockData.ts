@@ -1,4 +1,20 @@
-import { Team, User, Provider, TeamProvider, Spend, AuditLog, APICallLog, TeamBudget, BudgetAlert, ProviderFallbackConfig, ProviderHealth } from "../types";
+import {
+  Team,
+  User,
+  Provider,
+  TeamProvider,
+  Spend,
+  AuditLog,
+  APICallLog,
+  TeamBudget,
+  BudgetAlert,
+  ProviderFallbackConfig,
+  ProviderHealth,
+  MFAConfig,
+  LoginHistory,
+  Session,
+  PasswordPolicy
+} from "../types";
 // MOCK USER
 export const mockUsers: User[] = [
   // SUPER ADMIN
@@ -561,3 +577,83 @@ export const mockFallbackConfigs: ProviderFallbackConfig[] = [
     },
   },
 ]
+
+// Mock MFA Config
+
+export const mockMFAConfigs: MFAConfig[] = []
+
+// Mock Login History
+
+export const mockLoginHistory: LoginHistory[] = [
+  {
+    id: 'lh1',
+    userId: 'u1',
+    userName: 'Super Admin',
+    userEmail: 'admin@nexus.com',
+    ip: '192.168.1.1',
+    deviceName: 'Chrome on Windows',
+    browser: 'Chrome 120',
+    os: 'Windows 11',
+    location: 'Karachi, Pakistan',
+    status: 'success',
+    createdAt: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'lh2',
+    userId: 'u1',
+    userName: 'Super Admin',
+    userEmail: 'admin@nexus.com',
+    ip: '192.168.1.1',
+    deviceName: 'Chrome on Windows',
+    browser: 'Chrome 120',
+    os: 'Windows 11',
+    location: 'Karachi, Pakistan',
+    status: 'success',
+    createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+  },
+
+  {
+    id: 'lh3',
+    userId: 'u2',
+    userName: 'Admin Alpha',
+    userEmail: 'admin@alpha.com',
+    ip: '192.168.1.2',
+    deviceName: 'Firefox on Mac',
+    browser: 'Firefox 121',
+    os: 'macOS 14',
+    location: 'Lahore, Pakistan',
+    status: 'failed',
+    failedReason: 'Invalid password',
+    createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
+  },
+]
+
+// mock Sessions
+
+export const mockSessions: Session[] = [
+  {
+    userId: 'u1',
+    token: 'session_token_1',
+    deviceId: 'device_1',
+    deviceName: 'Chrome on Windows',
+    ip: '192.168.1.1',
+    userAgent: 'Mozilla/5.0...',
+    isTrusted: true,
+    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+    createdAt: new Date().toISOString(),
+  },
+]
+
+// mock PassWord policy
+
+export const mockPasswordPolicy: PasswordPolicy = {
+
+  minLength: 8,
+  requireUppercase: true,
+  requireLowercase: true,
+  requireNumber: true,
+  requireSpecialChar: true,
+  maxAgeDays: 90,
+  preventReuse: 5,
+
+}

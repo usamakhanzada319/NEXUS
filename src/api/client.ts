@@ -14,7 +14,12 @@ import {
   TeamBudget,
   ProviderHealth,
   ProviderFallbackConfig,
-  HealthCheckResult
+  HealthCheckResult,
+  MFAConfig,
+  MFASetupResponse,
+  LoginHistory,
+  Session,
+  PasswordPolicy
 } from "../types";
 
 import {
@@ -28,7 +33,11 @@ import {
   mockBudgetAlerts,
   mockBudgets,
   mockFallbackConfigs,
-  mockProviderHealth
+  mockProviderHealth,
+  mockMFAConfigs,
+  mockLoginHistory,
+  mockSessions,
+  mockPasswordPolicy
 } from "./mockData";
 
 import { encryptApiKey, decryptApiKey } from '../utils/encryption';
@@ -93,6 +102,22 @@ const initMockData = () => {
   }
   if (!localStorage.getItem("nexus_fallbackConfigs")) {
     saveToStorage("nexus_fallbackConfigs", mockFallbackConfigs);
+  }
+
+  if (!localStorage.getItem("nexus_mfaConfigs")) {
+    saveToStorage("nexus_mfaConfigs", mockMFAConfigs);
+  }
+
+  if (!localStorage.getItem("nexus_loginHistory")) {
+    saveToStorage("nexus_loginHistory", mockLoginHistory)
+  }
+
+  if (!localStorage.getItem("nexus_loginHistory")) {
+    saveToStorage("nexus_sessions", mockSessions);
+
+  }
+  if (!localStorage.getItem("nexus_passwordPolicy")) {
+    saveToStorage("nexus_passwordPolicy", mockPasswordPolicy);
   }
 };
 
@@ -1124,6 +1149,257 @@ export const mockApi = {
     }
 
 
+  },
+
+
+  // Generate TOTP secret
+
+  generateTOTPSecret: (userId: string): MFASetupResponse => {
+    try {
+
+      // simulate TOTP Secret
+      const secret = "ABCDEFGHIJKLMNOP".repeat(2);
+      const backupCodes = Array.from({ length: 10 }, () => Math.random().toString(36).substring(2, 8).toUpperCase());
+
+
+      // save MFA Config
+
+      const configs = loadFromStorage<MFAConfig[]>("nexus_mfaConfigs", mockMFAConfigs)
+      const existingIndex = configs.findIndex((c) => c.userId === userId)
+
+      const newConfig: MFAConfig = {
+        userId,
+        isEnabled: false,
+        secret,
+        backupCodes,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+
+      }
+
+      if (existingIndex !== -1) {
+        configs[existingIndex] = {
+          ...configs[existingIndex],
+          ...newConfig
+        }
+      } else {
+        configs.push(newConfig)
+      }
+      saveToStorage("nexus_mfaConfigs", configs);
+      return {
+        qrCode: `data:image/svg+xml,${encodeURIComponent('<svg>QR Code</svg>')}`,
+        secret,
+        backupCodes,
+      }
+    } catch (error) {
+      console.error("Error generating TOTP secret:", error);
+      throw new Error("Failed to generate TOTP secret");
+
+    }
+  },
+
+  // verify MFA code
+
+  verifyMFACode: (userId: string, code: string): boolean => {
+    try {
+
+      const configs = loadFromStorage<MFAConfig[]>("nexus_mfaConfigs", mockMFAConfigs);
+      const config = configs.find((c) => c.userId === userId);
+      if (!config || !config.secret) {
+        return false
+      }
+      // Simulate TOTP verification
+      const isValid = code.length === 6 && /^\d{6}$/.test(code);
+
+      if (isValid) {
+        config.isEnabled = true;
+        config.updatedAt = new Date().toISOString();
+        saveToStorage("nexus_mfaConfigs", configs);
+      }
+      return isValid
+    } catch (error) {
+      console.error("Error verifying MFA code:", error);
+      return false;
+
+    }
+  },
+
+  // Disable MFA
+  disableMFA: (userId: string): boolean => {
+    try {
+      const configs = loadFromStorage<MFAConfig[]>("nexus_mfaConfigs", mockMFAConfigs);
+      const config = configs.find(c => c.userId === userId);
+
+      if (!config) return false;
+
+      config.isEnabled = false;
+      config.secret = undefined;
+      config.updatedAt = new Date().toISOString();
+      saveToStorage("nexus_mfaConfigs", configs);
+      return true;
+
+    } catch (error) {
+      console.error("Error disabling MFA:", error);
+      return false;
+
+    }
+  },
+
+  // Get MFA config
+  getMFAConfig: (userId: string): MFAConfig | undefined => {
+    try {
+      const configs = loadFromStorage<MFAConfig[]>("nexus_mfaConfigs", mockMFAConfigs);
+      return configs.find(c => c.userId === userId);
+
+    } catch (error) {
+      console.error("Error getting MFA config:", error);
+      return undefined;
+    }
+
+  },
+
+  // Regenerate backup codes
+  regenerateBackupCodes: (userId: string): string[] => {
+    try {
+      const configs = loadFromStorage<MFAConfig[]>("nexus_mfaConfigs", mockMFAConfigs);
+      const config = configs.find(c => c.userId === userId);
+
+      if (!config) {
+        throw new Error("MFA config not found");
+      }
+
+      const newCode = Array.from({ length: 10 }, () =>
+        Math.random().toString(36).substring(2, 8).toUpperCase()
+      );
+      config.backupCodes = newCode;
+      config.updatedAt = new Date().toISOString()
+      saveToStorage("nexus_mfaConfigs", configs);
+      return newCode
+
+    } catch (error) {
+
+      console.error("Error regenerating backup codes:", error);
+      throw new Error("Failed to regenerate backup codes");
+
+    }
+  },
+
+  // login History Methods
+  getLoginHistory: (userId?: string): LoginHistory[] => {
+
+    try {
+      const history = loadFromStorage<LoginHistory[]>("nexus_loginHistory", mockLoginHistory);
+
+      if (userId) {
+        return history.filter((h) => h.userId === userId)
+      }
+      return history
+    } catch (error) {
+      console.error("Error fetching login history:", error);
+      return mockLoginHistory;
+
+    }
+  },
+
+  addLoginHistory: (entry: Omit<LoginHistory, "id" | "createdAt">): LoginHistory => {
+    try {
+      const history = loadFromStorage<LoginHistory[]>("nexus_loginHistory", mockLoginHistory);
+      const newEntry: LoginHistory = {
+        ...entry,
+        id: generateId(),
+        createdAt: new Date().toISOString(),
+      }
+      history.unshift(newEntry);
+      saveToStorage("nexus_loginHistory", history);
+      return newEntry;
+    } catch (error) {
+      console.error("Error adding login history:", error);
+      throw new Error("Failed to add login history");
+
+    }
+  },
+  // Session Methods
+
+  getSessions: (userId: string): Session[] => {
+    try {
+      const sessions = loadFromStorage<Session[]>("nexus_sessions", mockSessions);
+      return sessions.filter(s => s.userId === userId);
+    } catch (error) {
+      console.error("Error fetching sessions:", error);
+      return [];
+    }
+
+  },
+
+  addSesion: (session: Omit<Session, "createdAt">): Session => {
+    try {
+
+      const sessions = loadFromStorage<Session[]>("nexus_sessions", mockSessions);
+      const newSession: Session = {
+        ...session,
+        createdAt: new Date().toISOString(),
+
+      }
+      sessions.push(newSession);
+      saveToStorage("nexus_sessions", sessions);
+      return newSession
+
+    } catch (error) {
+      console.error("Error adding session:", error);
+      throw new Error("Failed to add session");
+    }
+
+  },
+
+  revokeSession: (userId: string, deviceId: string): boolean => {
+    try {
+      const sessions = loadFromStorage<Session[]>("nexus_sessions", mockSessions)
+      const filtered = sessions.filter((s) => !(s.userId === userId && s.deviceId === deviceId))
+      saveToStorage("nexus_sessions", filtered);
+      return true
+    } catch (error) {
+      console.error("Error revoking session:", error);
+      return false;
+
+    }
+  },
+
+  revokeAllSessions: (userId: string): boolean => {
+    try {
+
+      const sessions = loadFromStorage<Session[]>("nexus_sessions", mockSessions);
+      const filtered = sessions.filter(s => s.userId !== userId);
+      saveToStorage("nexus_sessions", filtered)
+      return true
+    } catch (error) {
+      console.error("Error revoking all sessions:", error);
+      return false;
+
+    }
+  },
+
+  // Password Policy Method
+  getPasswordPolicy: (): PasswordPolicy => {
+    try {
+      return loadFromStorage<PasswordPolicy>("nexus_passwordPolicy", mockPasswordPolicy)
+
+    } catch (error) {
+      console.error("Error fetching password policy:", error);
+      return mockPasswordPolicy;
+    }
+  },
+
+  updatePasswordPolicy: (policy: PasswordPolicy): PasswordPolicy => {
+    try {
+      saveToStorage("nexus_passwordPolicy", policy);
+      return policy
+
+    } catch (error) {
+
+      console.error("Error updating password policy:", error);
+      throw new Error("Failed to update password policy");
+    }
+
   }
 };
 
@@ -1477,6 +1753,81 @@ export const apiClient = {
       : Promise.resolve(undefined);
   },
 
+
+  // MFA
+  generateTOTPSecret: (userId: string): Promise<MFASetupResponse> => {
+    return isMockMode ? mockify(() => mockApi.generateTOTPSecret(userId))
+      : Promise.reject(new Error("API not configured"));
+  },
+
+  verifyMFACode: (userId: string, code: string): Promise<boolean> => {
+    return isMockMode ? mockify(() => mockApi.verifyMFACode(userId, code))
+      : Promise.resolve(false)
+  },
+  disableMFA: (userId: string): Promise<boolean> => {
+    return isMockMode ? mockify(() => mockApi.disableMFA(userId))
+      : Promise.resolve(false)
+  },
+  getMFAConfig: (userId: string): Promise<MFAConfig | undefined> => {
+    return isMockMode ? mockify(() => mockApi.getMFAConfig(userId))
+      : Promise.resolve(undefined)
+  },
+
+  regenerateBackupCodes: (userId: string): Promise<string[]> => {
+    return isMockMode ? mockify(() => mockApi.regenerateBackupCodes(userId))
+      : Promise.resolve([])
+  },
+
+  // Login History
+  getLoginHistory: (userId?: string): Promise<LoginHistory[]> => {
+    return isMockMode ? mockify(() => mockApi.getLoginHistory(userId))
+      : Promise.resolve([])
+
+  },
+
+  addLoginHistory: (entry: Omit<LoginHistory, "id" | "createdAt">): Promise<LoginHistory> => {
+    return isMockMode ? mockify(() => mockApi.addLoginHistory(entry))
+      : Promise.reject(new Error("API not configured"))
+  },
+
+  // Sessions
+  getSessions: (userId: string): Promise<Session[]> => {
+    return isMockMode ? mockify(() => mockApi.getSessions(userId))
+      : Promise.resolve([])
+  },
+
+  addSession: (session: Omit<Session, "createdAt">): Promise<Session> => {
+    return isMockMode ? mockify(() => mockApi.addSesion(session))
+      : Promise.reject(new Error("API not configured"))
+  },
+  revokeSession: (userId: string, deviceId: string): Promise<boolean> => {
+    return isMockMode ? mockify(() => mockApi.revokeSession(userId, deviceId))
+      : Promise.resolve(false);
+  },
+
+  revokeAllSessions: (userId: string): Promise<boolean> => {
+    return isMockMode ? mockify(() => mockApi.revokeAllSessions(userId))
+      : Promise.resolve(false)
+  },
+  // Password Policy
+  getPasswordPolicy: (): Promise<PasswordPolicy> => {
+
+    return isMockMode ? mockify(() => mockApi.getPasswordPolicy())
+      : Promise.resolve({
+        minLength: 8,
+        requireLowercase: true,
+        requireUppercase: true,
+        requireNumber: true,
+        requireSpecialChar: true,
+        maxAgeDays: 90,
+        preventReuse: 5
+      })
+  },
+
+  updatePasswordPolicy: (policy: PasswordPolicy): Promise<PasswordPolicy> => {
+    return isMockMode ? mockify(() => mockApi.updatePasswordPolicy(policy))
+      : Promise.reject(new Error("API not configured"))
+  }
 };
 
 
