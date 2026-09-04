@@ -270,4 +270,75 @@ export interface HealthCheckResult {
   success: boolean;
   error?: string;
   checkedAt: string;
-} 
+}
+
+
+// MFA Types
+
+export interface MFAConfig {
+  userId: string;
+  isEnabled: boolean;
+  secret?: string; //encrypted
+  backupCodes: string[]; //10 backup codes
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface MFASetupResponse {
+  qrCode: string;//QR code image URL or data
+  secret: string;
+  backupCodes: string[];
+}
+
+
+export interface MFAVerifyRequest {
+  userId: string;
+  code: string;
+}
+
+
+
+// Session Types
+
+export interface Session {
+  userId: string;
+  token: string;
+  deviceId: string;
+  deviceName: string;
+  ip: string;
+  userAgent: string;
+  isTrusted: boolean;
+  expiresAt: string;
+  createdAt: string;
+}
+
+
+// Login history types
+
+export interface LoginHistory {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  ip: string;
+  deviceName: string;
+  browser: string;
+  os: string;
+  location?: string;
+  status: 'success' | 'failed';
+  failedReason?: string;
+  createdAt: string;
+}
+
+// Password Policy Types
+
+export interface PasswordPolicy {
+
+  minLength: number;
+  requireUppercase: boolean;
+  requireLowercase: boolean;
+  requireNumber: boolean;
+  requireSpecialChar: boolean;
+  maxAgeDays: number; // password expiry in days
+  preventReuse: number; // number of previous passwords to prevent reuse
+}
