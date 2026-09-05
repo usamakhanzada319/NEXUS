@@ -1,12 +1,11 @@
-import { useEffect, useState } from "react";
+import {  useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useSecurity } from "../hooks/useSecurity";
 import { MFAConfig } from "../components/security/MFAConfig";
 import { BackupCodes } from "../components/security/BackupCodes";
 import { PasswordPolicy } from "../components/security/PasswordPolicy";
 import { LoginHistory } from "../components/security/LoginHistory";
-import { Shield, Key, History, Lock, icons } from "lucide-react";
-import { Label } from "recharts";
+import { Shield, Key, History, Lock,  } from "lucide-react";
 
 export const SecuritySetting: React.FC = () => {
   const { user, isAdmin } = useAuth();

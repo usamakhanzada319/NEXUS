@@ -8,7 +8,7 @@ interface backupCodesProps {
   userId: string;
 }
 
-export const backupCodes: React.FC<backupCodesProps> = ({ userId }) => {
+export const BackupCodes: React.FC<backupCodesProps> = ({ userId }) => {
   const { addNotification } = useNotification();
 
   const [codes, setCodes] = useState<string[]>([]);
