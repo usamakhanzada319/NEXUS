@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { apiClient } from "../../api/client";
 import { useNotification } from "../../context/NotificationContext";
-import { QrCode, Shield, CheckCircle, XCircle, RefreshCw } from "lucide-react";
+import { QrCode, Shield, CheckCircle,  RefreshCw } from "lucide-react";
 
 interface MFAConfigProps {
   userId: string;

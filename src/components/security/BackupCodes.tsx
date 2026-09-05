@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNotification } from "../../context/NotificationContext";
 import { apiClient } from "../../api/client";
 
-import { Key, RefreshCw, CheckCircle, Copy, Code } from "lucide-react";
+import { Key, RefreshCw, CheckCircle, Copy } from "lucide-react";
 
 interface backupCodesProps {
   userId: string;
