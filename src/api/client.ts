@@ -19,7 +19,12 @@ import {
   MFASetupResponse,
   LoginHistory,
   Session,
-  PasswordPolicy
+  PasswordPolicy,
+  InvoiceItem,
+  PaymentMethod,
+  UsageReport,
+  BillingSummary,
+  Invoice
 } from "../types";
 
 import {
@@ -37,7 +42,11 @@ import {
   mockMFAConfigs,
   mockLoginHistory,
   mockSessions,
-  mockPasswordPolicy
+  mockPasswordPolicy,
+  mockInvoices,
+  mockPaymentMethods,
+  mockUsageReports,
+  mockBillingSummary
 } from "./mockData";
 
 import { encryptApiKey, decryptApiKey } from '../utils/encryption';
@@ -118,6 +127,22 @@ const initMockData = () => {
   }
   if (!localStorage.getItem("nexus_passwordPolicy")) {
     saveToStorage("nexus_passwordPolicy", mockPasswordPolicy);
+  }
+
+  if (!localStorage.getItem("nexus_invoices")) {
+    saveToStorage("nexus_invoices", mockInvoices)
+  }
+
+  if (!localStorage.getItem("nexus_paymentMethods")) {
+    saveToStorage("nexus_paymentMethods", mockPaymentMethods)
+  }
+
+  if (!localStorage.getItem("nexus_usageReports")) {
+    saveToStorage("nexus_usageReports", mockUsageReports)
+  }
+
+  if (!localStorage.getItem("nexus_billingSummary")) {
+    saveToStorage("nexus_billingSummary", mockBillingSummary)
   }
 };
 
@@ -1400,6 +1425,74 @@ export const mockApi = {
       throw new Error("Failed to update password policy");
     }
 
+  },
+
+
+  //  Billing Methods
+
+  getInvoices: (teamId?: string): Invoice[] => {
+    try {
+      const invoices = loadFromStorage<Invoice[]>("nexus_invoices", mockInvoices)
+      if (teamId) {
+        return invoices.filter(inv => inv.teamId === teamId)
+      }
+      return invoices
+
+    } catch (error) {
+      console.error("Error fetching invoices:", error);
+      return mockInvoices;
+
+    }
+
+  },
+
+  // Get invoice by ID
+
+  getInvoiceById: (invoiceId: string): Invoice | undefined => {
+    try {
+      const invoices = loadFromStorage<Invoice[]>("nexus_invoices", mockInvoices);
+      return invoices.find(inv => inv.id === invoiceId);
+
+    } catch (error) {
+      console.error(`Error fetching invoice ${invoiceId}:`, error);
+      return undefined;
+    }
+  },
+
+  // Create invoice
+  createInvoice: (invoice: Omit<Invoice, "id" | "createdAt">): Invoice => {
+    try {
+      const invoices = loadFromStorage<Invoice[]>("nexus_invoices", mockInvoices);
+      const newInvoice: Invoice = {
+        ...invoice,
+        id: generateId(),
+        createdAt: new Date().toISOString()
+      }
+      invoices.push(newInvoice)
+      saveToStorage("nexus_invoices", invoices);
+      return newInvoice;
+    } catch (error) {
+      console.error("Error creating invoice:", error);
+      throw new Error("Failed to create invoice");
+
+    }
+  },
+
+  // Pay invoice
+  payInvoice: (invoiceId: string, paymentMethod?: string): Invoice | undefined => {
+    try {
+      const invoices = loadFromStorage<Invoice[]>("nexus_invoices", mockInvoices);
+      const index = invoices.findIndex(inv => inv.id === invoiceId);
+      if (index === -1) return undefined;
+      invoices[index].status = 'paid';
+      invoices[index].paidAt = new Date().toISOString();
+      saveToStorage("nexus_invoices", invoices);
+      return invoices[index];
+
+    } catch (error) {
+      console.error(`Error paying invoice ${invoiceId}:`, error);
+      return undefined;
+    }
   }
 };
 

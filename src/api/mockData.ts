@@ -667,7 +667,7 @@ export const mockPasswordPolicy: PasswordPolicy = {
 // Payment Mock Data
 
 // Mock Invoice
-export const mockInvoice: Invoice[] = [
+export const mockInvoices: Invoice[] = [
   {
     id: 'inv_1',
     teamId: 't1',
