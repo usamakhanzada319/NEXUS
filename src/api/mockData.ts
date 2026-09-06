@@ -13,7 +13,12 @@ import {
   MFAConfig,
   LoginHistory,
   Session,
-  PasswordPolicy
+  PasswordPolicy,
+  InvoiceItem,
+  PaymentMethod,
+  UsageReport,
+  BillingSummary,
+  Invoice
 } from "../types";
 // MOCK USER
 export const mockUsers: User[] = [
@@ -656,4 +661,272 @@ export const mockPasswordPolicy: PasswordPolicy = {
   maxAgeDays: 90,
   preventReuse: 5,
 
+}
+
+
+// Payment Mock Data
+
+// Mock Invoice
+export const mockInvoice: Invoice[] = [
+  {
+    id: 'inv_1',
+    teamId: 't1',
+    teamName: 'Alpha Squad',
+    invoiceNumber: 'INV-2026-001',
+    periodStart: '2026-08-01T00:00:00Z',
+    periodEnd: '2026-08-31T23:59:59Z',
+    totalAmount: 4850.50,
+    status: 'paid',
+    items: [
+      {
+        id: 'item_1',
+        description: 'OpenAI API Usage - August 2026',
+        quantity: 1,
+        unitPrice: 3200.00,
+        amount: 3200.00,
+        category: 'usage',
+      },
+      {
+        id: 'item_2',
+        description: 'Anthropic API Usage - August 2026',
+        quantity: 1,
+        unitPrice: 1650.50,
+        amount: 1650.50,
+        category: 'usage',
+      },
+    ],
+    createdAt: '2026-09-01T10:00:00Z',
+    dueDate: '2026-09-15T23:59:59Z',
+    paidAt: '2026-09-02T14:30:00Z',
+  },
+  {
+    id: 'inv_2',
+    teamId: 't2',
+    teamName: 'Beta Team',
+    invoiceNumber: 'INV-2026-002',
+    periodStart: '2026-08-01T00:00:00Z',
+    periodEnd: '2026-08-31T23:59:59Z',
+    totalAmount: 2100.00,
+    status: 'pending',
+    items: [
+      {
+        id: 'item_3',
+        description: 'OpenAI API Usage - August 2026',
+        quantity: 1,
+        unitPrice: 1200.00,
+        amount: 1200.00,
+        category: 'usage',
+      },
+      {
+        id: 'item_4',
+        description: 'Google Gemini Usage - August 2026',
+        quantity: 1,
+        unitPrice: 900.00,
+        amount: 900.00,
+        category: 'usage',
+      },
+    ],
+    createdAt: '2026-09-01T10:00:00Z',
+    dueDate: '2026-09-15T23:59:59Z',
+  },
+  {
+    id: 'inv_3',
+    teamId: 't1',
+    teamName: 'Alpha Squad',
+    invoiceNumber: 'INV-2026-003',
+    periodStart: '2026-07-01T00:00:00Z',
+    periodEnd: '2026-07-31T23:59:59Z',
+    totalAmount: 3200.00,
+    status: 'paid',
+    items: [
+      {
+        id: 'item_5',
+        description: 'OpenAI API Usage - July 2026',
+        quantity: 1,
+        unitPrice: 3200.00,
+        amount: 3200.00,
+        category: 'usage',
+      },
+    ],
+    createdAt: '2026-08-01T10:00:00Z',
+    dueDate: '2026-08-15T23:59:59Z',
+    paidAt: '2026-08-02T14:30:00Z',
+  },
+  {
+    id: 'inv_4',
+    teamId: 't3',
+    teamName: 'Gamma Group',
+    invoiceNumber: 'INV-2026-004',
+    periodStart: '2026-08-01T00:00:00Z',
+    periodEnd: '2026-08-31T23:59:59Z',
+    totalAmount: 1250.00,
+    status: 'overdue',
+    items: [
+      {
+        id: 'item_6',
+        description: 'OpenAI API Usage - August 2026',
+        quantity: 1,
+        unitPrice: 1250.00,
+        amount: 1250.00,
+        category: 'usage',
+      },
+    ],
+    createdAt: '2026-09-01T10:00:00Z',
+    dueDate: '2026-09-15T23:59:59Z',
+  },
+]
+
+// Mock Payment Methods
+
+export const mockPaymentMethods: PaymentMethod[] = [
+  {
+    id: "pm_1",
+    teamId: "t1",
+    type: "card",
+    last4: "4242",
+    expiryMonth: 12,
+    expiryYear: 2028,
+    isDefault: true,
+    createdAt: '2026-01-15T10:00:00Z',
+
+  },
+  {
+    id: 'pm_2',
+    teamId: 't2',
+    type: 'google_pay',
+    last4: '8888',
+    isDefault: true,
+    isGooglePay: true,
+    createdAt: '2026-02-20T10:00:00Z',
+  },
+  {
+    id: 'pm_3',
+    teamId: 't1',
+    type: 'apple_pay',
+    last4: '1234',
+    isDefault: false,
+    isApplePay: true,
+    createdAt: '2026-03-10T10:00:00Z',
+  },
+  {
+    id: 'pm_4',
+    teamId: 't2',
+    type: 'paypal',
+    last4: '5678',
+    isDefault: false,
+    createdAt: '2026-04-05T10:00:00Z',
+  },
+]
+
+
+// Mock Usage Reports
+
+
+export const mockUsageReports: UsageReport[] = [
+  {
+    id: 'ur_1',
+    teamId: 't1',
+    teamName: 'Alpha Squad',
+    periodStart: '2026-08-01T00:00:00Z',
+    periodEnd: '2026-08-31T23:59:59Z',
+    totalCost: 4850.50,
+    totalTokens: 2500000,
+    totalCalls: 1250,
+    byProvider: [
+      {
+        providerId: 'p1',
+        providerName: 'OpenAI',
+        cost: 3200.00,
+        tokens: 1800000,
+        calls: 800,
+      },
+      {
+        providerId: 'p2',
+        providerName: 'Anthropic',
+        cost: 1650.50,
+        tokens: 700000,
+        calls: 450,
+      },
+    ],
+    byModel: [
+      {
+        model: 'gpt-4',
+        cost: 2000.00,
+        tokens: 1000000,
+        calls: 400,
+      },
+      {
+        model: 'gpt-3.5-turbo',
+        cost: 1200.00,
+        tokens: 800000,
+        calls: 400,
+      },
+      {
+        model: 'claude-3-opus',
+        cost: 1650.50,
+        tokens: 700000,
+        calls: 450,
+      },
+    ],
+    byDay: [
+      { date: '2026-08-01', cost: 120.50, tokens: 50000, calls: 25 },
+      { date: '2026-08-02', cost: 150.00, tokens: 60000, calls: 30 },
+      { date: '2026-08-03', cost: 200.00, tokens: 80000, calls: 40 },
+      { date: '2026-08-04', cost: 180.00, tokens: 70000, calls: 35 },
+    ],
+  },
+  {
+    id: 'ur_2',
+    teamId: 't2',
+    teamName: 'Beta Team',
+    periodStart: '2026-08-01T00:00:00Z',
+    periodEnd: '2026-08-31T23:59:59Z',
+    totalCost: 2100.00,
+    totalTokens: 1000000,
+    totalCalls: 600,
+    byProvider: [
+      {
+        providerId: 'p1',
+        providerName: 'OpenAI',
+        cost: 1200.00,
+        tokens: 600000,
+        calls: 400,
+      },
+      {
+        providerId: 'p3',
+        providerName: 'Google Gemini',
+        cost: 900.00,
+        tokens: 400000,
+        calls: 200,
+      },
+    ],
+    byModel: [
+      {
+        model: 'gpt-3.5-turbo',
+        cost: 1200.00,
+        tokens: 600000,
+        calls: 400,
+      },
+      {
+        model: 'gemini-pro',
+        cost: 900.00,
+        tokens: 400000,
+        calls: 200,
+      },
+    ],
+    byDay: [
+      { date: '2026-08-01', cost: 60.00, tokens: 25000, calls: 15 },
+      { date: '2026-08-02', cost: 75.00, tokens: 30000, calls: 20 },
+    ],
+  },
+]
+
+// Mock Billing Summary 
+export const mockBillingSummary: BillingSummary = {
+  totalInvoices: 4,
+  paidInvoices: 2,
+  pendingInvoices: 1,
+  overdueInvoices: 1,
+  totalRevenue: 8100.50,
+  averageInvoiceAmount: 2025.13
 }

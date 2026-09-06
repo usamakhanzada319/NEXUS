@@ -347,7 +347,7 @@ export interface PasswordPolicy {
 // Billing Types
 
 
-export type PaymentType = "card" | "google_pay" | "apple_pay" | "upi" | "bank"
+export type PaymentType = "card" | "google_pay" | "apple_pay" | "upi" | "paypal" | "bank"
 
 export interface Invoice {
   id: string;
