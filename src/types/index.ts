@@ -342,3 +342,87 @@ export interface PasswordPolicy {
   maxAgeDays: number; // password expiry in days
   preventReuse: number; // number of previous passwords to prevent reuse
 }
+
+
+// Billing Types
+
+
+export type PaymentType = "card" | "google_pay" | "apple_pay" | "upi" | "bank"
+
+export interface Invoice {
+  id: string;
+  teamId: string;
+  teamName: string;
+  invoiceNumber: string;
+  periodStart: string;
+  periodEnd: string;
+  totalAmount: number;
+  status: "paid" | "pending" | "overdue" | "cancelled"
+  items: InvoiceItem[];
+  createdAt: string;
+  dueDate: string;
+  paidAt?: string;
+}
+
+export interface InvoiceItem {
+  id: string;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  amount: number;
+  category: 'usage' | 'subscription' | 'one-time' | 'other';
+}
+
+export interface PaymentMethod {
+  id: string;
+  teamId: string;
+  type: PaymentType;
+  last4: string;
+  expiryMonth?: number;
+  expiryYear?: number;
+  isDefault: boolean;
+  isGooglePay?: boolean;
+  isApplePay?: boolean;
+  createdAt: string;
+}
+
+
+
+export interface UsageReport {
+  id: string;
+  teamId: string;
+  teamName: string;
+  periodStart: string;
+  periodEnd: string;
+  totalCost: number;
+  totalTokens: number;
+  totalCalls: number;
+  byProvider: {
+    providerId: string;
+    providerName: string;
+    cost: number;
+    tokens: number;
+    calls: number;
+  }[];
+  byModel: {
+    model: string;
+    cost: number;
+    tokens: number;
+    calls: number;
+  }[];
+  byDay: {
+    date: string;
+    cost: number;
+    tokens: number;
+    calls: number;
+  }[];
+}
+
+export interface BillingSummary {
+  totalInvoices: number;
+  paidInvoices: number;
+  pendingInvoices: number;
+  overdueInvoices: number;
+  totalRevenue: number;
+  averageInvoiceAmount: number;
+}
