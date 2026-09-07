@@ -20,7 +20,6 @@ import {
   LoginHistory,
   Session,
   PasswordPolicy,
-  InvoiceItem,
   PaymentMethod,
   UsageReport,
   BillingSummary,
@@ -50,7 +49,6 @@ import {
 } from "./mockData";
 
 import { encryptApiKey, decryptApiKey } from '../utils/encryption';
-import { create } from "axios";
 
 
 // LOCAL STORAGE HELPERS
@@ -1480,7 +1478,7 @@ export const mockApi = {
   },
 
   // Pay invoice
-  payInvoice: (invoiceId: string, paymentMethod?: string): Invoice | undefined => {
+  payInvoice: (invoiceId: string): Invoice | undefined => {
     try {
       const invoices = loadFromStorage<Invoice[]>("nexus_invoices", mockInvoices);
       const index = invoices.findIndex(inv => inv.id === invoiceId);
@@ -1489,7 +1487,6 @@ export const mockApi = {
       invoices[index].paidAt = new Date().toISOString();
       saveToStorage("nexus_invoices", invoices);
       return invoices[index];
-
     } catch (error) {
       console.error(`Error paying invoice ${invoiceId}:`, error);
       return undefined;
