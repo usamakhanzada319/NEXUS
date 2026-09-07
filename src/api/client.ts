@@ -1493,6 +1493,100 @@ export const mockApi = {
       console.error(`Error paying invoice ${invoiceId}:`, error);
       return undefined;
     }
+  },
+
+  // get Payment Method
+
+  getPaymentMethod: (teamId: string): PaymentMethod[] => {
+    try {
+      const method = loadFromStorage<PaymentMethod[]>("nexus_paymentMethods", mockPaymentMethods);
+      return method.filter((pm) => pm.teamId === teamId);
+    } catch (error) {
+      console.error("Error fetching payment methods:", error);
+      return mockPaymentMethods.filter(pm => pm.teamId === teamId);
+
+    }
+  },
+
+  // Add payment method
+
+
+  addPaymentMethod: (method: Omit<PaymentMethod, "id" | "createdAt">): PaymentMethod => {
+
+    try {
+      const methods = loadFromStorage<PaymentMethod[]>("nexus_paymentMethods", mockPaymentMethods);
+      const newMethod: PaymentMethod = {
+        ...method,
+        id: generateId(),
+        createdAt: new Date().toISOString(),
+
+      }
+      methods.push(newMethod)
+      saveToStorage("nexus_paymentMethods", methods)
+      return newMethod
+    } catch (error) {
+      console.error("Error adding payment method:", error);
+      throw new Error("Failed to add payment method");
+    }
+  },
+
+  // Remove payment method
+
+  removePaymentMethod: (methodId: string): boolean => {
+    try {
+      const methods = loadFromStorage<PaymentMethod[]>("nexus_paymentMethods", mockPaymentMethods);
+      const filtered = methods.filter((pt) => pt.id !== methodId);
+      saveToStorage("nexus_paymentMethods", filtered)
+      return true
+    } catch (error) {
+      console.error(`Error removing payment method ${methodId}:`, error);
+      return false;
+    }
+  },
+
+  // Set default payment method
+  setDefaultPaymentMethod: (teamId: string, methodId: string): boolean => {
+    try {
+      const methods = loadFromStorage<PaymentMethod[]>("nexus_paymentMethods", mockPaymentMethods);
+      methods.map((pm) => {
+        if (pm.teamId === teamId) {
+          pm.isDefault = pm.id === methodId
+        }
+      })
+      saveToStorage("nexus_paymentMethods", methods);
+      return true;
+    } catch (error) {
+      console.error(`Error setting default payment method:`, error);
+      return false;
+
+    }
+  },
+
+  // Get usage report
+  getUsageReport: (teamId: string, periodStart: string, periodEnd: string): UsageReport | undefined => {
+    try {
+      const reports = loadFromStorage<UsageReport[]>("nexus_usageReports", mockUsageReports);
+      return reports.find(report =>
+        report.teamId === teamId &&
+        report.periodStart === periodStart &&
+        report.periodEnd && periodEnd
+      )
+    } catch (error) {
+      console.error("Error fetching usage report:", error);
+      return undefined;
+
+    }
+  },
+
+  // Get billing summary
+  getBillingSummary: (): BillingSummary => {
+    try {
+      return loadFromStorage<BillingSummary>("nexus_billingSummary", mockBillingSummary);
+    } catch (error) {
+      console.error("Error fetching billing summary:", error);
+      return mockBillingSummary;
+    }
+
   }
 };
 
