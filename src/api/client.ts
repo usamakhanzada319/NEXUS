@@ -50,6 +50,7 @@ import {
 } from "./mockData";
 
 import { encryptApiKey, decryptApiKey } from '../utils/encryption';
+import { create } from "axios";
 
 
 // LOCAL STORAGE HELPERS
@@ -1497,7 +1498,7 @@ export const mockApi = {
 
   // get Payment Method
 
-  getPaymentMethod: (teamId: string): PaymentMethod[] => {
+  getPaymentMethods: (teamId: string): PaymentMethod[] => {
     try {
       const method = loadFromStorage<PaymentMethod[]>("nexus_paymentMethods", mockPaymentMethods);
       return method.filter((pm) => pm.teamId === teamId);
@@ -2014,6 +2015,69 @@ export const apiClient = {
   updatePasswordPolicy: (policy: PasswordPolicy): Promise<PasswordPolicy> => {
     return isMockMode ? mockify(() => mockApi.updatePasswordPolicy(policy))
       : Promise.reject(new Error("API not configured"))
+  },
+
+  // Billing
+  getInvoice: (teamId?: string): Promise<Invoice[]> => {
+    return isMockMode
+      ? mockify(() => mockApi.getInvoices(teamId))
+      : Promise.resolve([])
+  },
+  getInvoiceById: (invoceId: string): Promise<Invoice | undefined> => {
+
+    return isMockMode
+      ? mockify(() => mockApi.getInvoiceById(invoceId))
+      : Promise.resolve(undefined);
+  },
+
+  createInvoice: (invoice: Omit<Invoice, "id" | "createdAt">): Promise<Invoice> => {
+    return isMockMode
+      ? mockify(() => mockApi.createInvoice(invoice))
+      : Promise.reject(new Error("API not configured"));
+
+  },
+  payInvoice: (invoiceId: string, paymentMethod?: string): Promise<Invoice | undefined> => {
+    return isMockMode
+      ? mockify(() => mockApi.payInvoice(invoiceId, paymentMethod))
+      : Promise.resolve(undefined);
+  },
+  getPaymentMethods: (teamId: string): Promise<PaymentMethod[]> => {
+    return isMockMode
+      ? mockify(() => mockApi.getPaymentMethods(teamId))
+      : Promise.resolve([]);
+  },
+
+  addPaymentMethod: (method: Omit<PaymentMethod, 'id' | 'createdAt'>): Promise<PaymentMethod> => {
+    return isMockMode
+      ? mockify(() => mockApi.addPaymentMethod(method))
+      : Promise.reject(new Error("API not configured"));
+  },
+  removePaymentMethod: (methodId: string): Promise<boolean> => {
+    return isMockMode
+      ? mockify(() => mockApi.removePaymentMethod(methodId))
+      : Promise.resolve(false);
+  },
+  setDefaultPaymentMethod: (teamId: string, methodId: string): Promise<boolean> => {
+    return isMockMode
+      ? mockify(() => mockApi.setDefaultPaymentMethod(teamId, methodId))
+      : Promise.resolve(false);
+  },
+  getUsageReport: (teamId: string, periodStart: string, periodEnd: string): Promise<UsageReport | undefined> => {
+    return isMockMode
+      ? mockify(() => mockApi.getUsageReport(teamId, periodStart, periodEnd))
+      : Promise.resolve(undefined);
+  },
+  getBillingSummary: (): Promise<BillingSummary> => {
+    return isMockMode
+      ? mockify(() => mockApi.getBillingSummary())
+      : Promise.resolve({
+        totalInvoices: 0,
+        paidInvoices: 0,
+        pendingInvoices: 0,
+        overdueInvoices: 0,
+        totalRevenue: 0,
+        averageInvoiceAmount: 0,
+      })
   }
 };
 
