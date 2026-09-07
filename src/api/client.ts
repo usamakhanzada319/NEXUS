@@ -1478,13 +1478,14 @@ export const mockApi = {
   },
 
   // Pay invoice
-  payInvoice: (invoiceId: string): Invoice | undefined => {
+  payInvoice: (invoiceId: string, _paymentMethod?: string): Invoice | undefined => {
     try {
       const invoices = loadFromStorage<Invoice[]>("nexus_invoices", mockInvoices);
       const index = invoices.findIndex(inv => inv.id === invoiceId);
       if (index === -1) return undefined;
       invoices[index].status = 'paid';
       invoices[index].paidAt = new Date().toISOString();
+
       saveToStorage("nexus_invoices", invoices);
       return invoices[index];
     } catch (error) {
