@@ -13,6 +13,7 @@ import {
   DollarSign,
   Activity,
   Shield,
+  FileText,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
@@ -33,6 +34,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
     { path: "/budget", label: "Budget", icon: DollarSign },
     { path: "/provider-health", label: "Provider Health", icon: Activity },
     { path: "/security", label: "Security", icon: Shield },
+    { path: "/billing", label: "Billing", icon: FileText },
   ];
 
   //  Super Admin items
