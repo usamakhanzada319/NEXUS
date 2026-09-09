@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { apiClient } from "../../api/client";
 import { UsageReport as UsageReportType } from "../../types";
-import { BarChart3, TrendingUp, Activity, RefreshCw } from "lucide-react";
+import { BarChart3, RefreshCw } from "lucide-react";
 
 interface UsageReportProps {
   teamId: string;

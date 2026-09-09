@@ -275,7 +275,7 @@ export const Billing: React.FC = () => {
             methods={paymentMethods}
             onAdd={handleAddPaymentMethod}
             onRemove={handleRemovePaymentMethod}
-            onSetDefult={handleSetDefaultPayment}
+            onSetDefault={handleSetDefaultPayment}
           />
         </div>
       )}
