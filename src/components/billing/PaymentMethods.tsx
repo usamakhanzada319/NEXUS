@@ -118,7 +118,7 @@ export const PaymentMethods: React.FC<PaymentMethodsProps> = ({
             </div>
 
             <div className="space-y-3">
-              {/* ✅ Credit/Debit Card */}
+              {/* Credit/Debit Card */}
               <button
                 onClick={() => handleAddMethod("card")}
                 className="w-full flex items-center gap-3 p-4 border border-border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
@@ -133,7 +133,7 @@ export const PaymentMethods: React.FC<PaymentMethodsProps> = ({
                 <span className="text-xs text-muted-foreground">Popular</span>
               </button>
 
-              {/* ✅ Google Pay */}
+              {/* Google Pay */}
               <button
                 onClick={() => handleAddMethod("google_pay")}
                 className="w-full flex items-center gap-3 p-4 border border-border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
@@ -150,7 +150,7 @@ export const PaymentMethods: React.FC<PaymentMethodsProps> = ({
                 </span>
               </button>
 
-              {/* ✅ Apple Pay */}
+              {/* Apple Pay */}
               <button
                 onClick={() => handleAddMethod("apple_pay")}
                 className="w-full flex items-center gap-3 p-4 border border-border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
@@ -167,7 +167,7 @@ export const PaymentMethods: React.FC<PaymentMethodsProps> = ({
                 </span>
               </button>
 
-              {/* ✅ PayPal */}
+              {/*  PayPal */}
               <button
                 onClick={() => handleAddMethod("paypal")}
                 className="w-full flex items-center gap-3 p-4 border border-border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
