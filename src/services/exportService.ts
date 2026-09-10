@@ -1,7 +1,5 @@
 // service is convert data (invoice & reports) in CSV and PDF format 
 
-import { Bold } from "lucide-react";
-
 export const exportService = {
     toCSV: <T extends Record<string, any>>(data: T[], fileName: string): void => {
 
