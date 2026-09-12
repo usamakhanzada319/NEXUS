@@ -35,6 +35,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
     { path: "/provider-health", label: "Provider Health", icon: Activity },
     { path: "/security", label: "Security", icon: Shield },
     { path: "/billing", label: "Billing", icon: FileText },
+    { path: "/settings", label: "Settings", icon: Settings },
   ];
 
   //  Super Admin items
@@ -43,7 +44,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
   // Admin items
   const adminItems = [
     { path: "/audit-logs", label: "Audit Logs", icon: Clock },
-    { path: "/settings", label: "Settings", icon: Settings },
   ];
 
   return (

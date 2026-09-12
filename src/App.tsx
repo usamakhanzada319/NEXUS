@@ -22,6 +22,7 @@ import { BudgetProvider } from "./context/BudgetContext";
 import { ProviderHealth } from "./pages/ProviderHealth";
 import { SecuritySetting } from "./pages/SecuritySettings";
 import { Billing } from "./pages/Billing";
+import { Settings } from "./pages/Settings";
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -173,6 +174,15 @@ function App() {
                       element={
                         <RoleBasedRoute allowedRoles={["admin", "super_admin"]}>
                           <Billing />
+                        </RoleBasedRoute>
+                      }
+                    />
+
+                    <Route
+                      path="/settings"
+                      element={
+                        <RoleBasedRoute allowedRoles={["admin", "super_admin"]}>
+                          <Settings />
                         </RoleBasedRoute>
                       }
                     />
