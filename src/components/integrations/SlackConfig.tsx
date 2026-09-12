@@ -1,6 +1,4 @@
-// ============================================
-// SLACK CONFIG — Slack webhook URL setup karne ke liye
-// ============================================
+// SLACK CONFIG — for setup Slack webhook URL
 
 import React, { useState, useEffect } from "react";
 import {
@@ -13,29 +11,13 @@ import {
 } from "lucide-react";
 import { useNotification } from "../../context/NotificationContext";
 
-/**
- * 🤔 Kya Hai?
- * Yeh component Slack integration configure karne ke liye hai.
- *
- * ❓ Kyun Use Kiya?
- * - Slack Incoming Webhook URL ko save karte hain
- * - Is se NEXUS Slack channel par alerts bhej sakta hai
- * - Team collaboration improve hoti hai
- *
- * ⚙️ Kaise Kaam Karegi?
- * 1. User Slack channel mein "Incoming Webhook" create karega
- * 2. Webhook URL copy karega aur yahan paste karega
- * 3. "Save" click karega → localStorage mein save ho jayega
- * 4. Test button click karega → test message bhejega
- */
-
 export const SlackConfig: React.FC = () => {
   const { addNotification } = useNotification();
   const [webhookUrl, setWebhookUrl] = useState("");
   const [isSaved, setIsSaved] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
 
-  // ✅ Load saved URL on mount
+  //  Load saved URL on mount
   useEffect(() => {
     const saved = localStorage.getItem("nexus_slack_webhook");
     if (saved) {
@@ -44,14 +26,14 @@ export const SlackConfig: React.FC = () => {
     }
   }, []);
 
-  // ✅ Save webhook URL
+  //  Save webhook URL
   const handleSave = () => {
     if (!webhookUrl.trim()) {
       addNotification("Please enter a valid webhook URL", "warning");
       return;
     }
 
-    // ✅ Basic URL validation
+    //  Basic URL validation
     try {
       new URL(webhookUrl);
     } catch {
@@ -64,7 +46,7 @@ export const SlackConfig: React.FC = () => {
     addNotification("Slack webhook URL saved successfully!", "success");
   };
 
-  // ✅ Test webhook
+  // Test webhook
   const handleTest = async () => {
     if (!webhookUrl) {
       addNotification("Please save a webhook URL first", "warning");
@@ -73,30 +55,30 @@ export const SlackConfig: React.FC = () => {
 
     setIsTesting(true);
     try {
-      // ✅ Mock test — console mein simulate karein
-      console.log("📨 Testing Slack webhook...");
-      console.log("📨 URL:", webhookUrl);
-      console.log('📨 Message: "🟢 NEXUS: Test message from NEXUS!"');
+      //  Mock test — console mein simulate karein
+      console.log(" Testing Slack webhook...");
+      console.log(" URL:", webhookUrl);
+      console.log(' Message: " NEXUS: Test message from NEXUS!"');
 
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      addNotification("✅ Test message sent to Slack!", "success");
+      addNotification(" Test message sent to Slack!", "success");
 
-      // ✅ Real implementation (Phase 11)
+      //  Real implementation (Backend Phase)
       // const response = await fetch(webhookUrl, {
       //   method: 'POST',
       //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ text: '🟢 NEXUS: Test message from NEXUS!' }),
+      //   body: JSON.stringify({ text: ' NEXUS: Test message from NEXUS!' }),
       // });
     } catch (error) {
-      console.error("❌ Test failed:", error);
-      addNotification("❌ Failed to send test message", "error");
+      console.error("Test failed:", error);
+      addNotification("Failed to send test message", "error");
     } finally {
       setIsTesting(false);
     }
   };
 
-  // ✅ Remove saved URL
+  // Remove saved URL
   const handleRemove = () => {
     localStorage.removeItem("nexus_slack_webhook");
     setWebhookUrl("");
@@ -139,7 +121,7 @@ export const SlackConfig: React.FC = () => {
                 type="url"
                 value={webhookUrl}
                 onChange={(e) => setWebhookUrl(e.target.value)}
-                placeholder="https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"
+                placeholder="https://hooks.slack.com/services/YOUR_WEBHOOK_URL"
                 className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary-500"
                 disabled={isSaved}
               />
@@ -164,7 +146,7 @@ export const SlackConfig: React.FC = () => {
           </div>
           <p className="text-xs text-muted-foreground mt-1">
             {isSaved
-              ? "✅ Slack webhook is configured"
+              ? " Slack webhook is configured"
               : "Create an Incoming Webhook in Slack settings and paste the URL here."}
           </p>
         </div>
