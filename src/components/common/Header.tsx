@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Menu,
   Bell,
@@ -8,6 +8,7 @@ import {
   Moon,
   Sun,
   ChevronDown,
+  Zap,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useTeam } from "../../context/TeamContext";
@@ -24,7 +25,13 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
     return localStorage.getItem("darkMode") === "true";
   });
   const [isTeamDropdownOpen, setIsTeamDropdownOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
+  // ✅ Refs for outside click detection
+  const teamDropdownRef = useRef<HTMLDivElement>(null);
+  const profileDropdownRef = useRef<HTMLDivElement>(null);
+
+  // ✅ Dark mode effect
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add("dark");
@@ -35,20 +42,45 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
     }
   }, [darkMode]);
 
+  // ✅ Outside click detection
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        teamDropdownRef.current &&
+        !teamDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsTeamDropdownOpen(false);
+      }
+      if (
+        profileDropdownRef.current &&
+        !profileDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
   };
 
   const handleTeamSwitch = (teamId: string) => {
-    switchTeam(teamId);
-    setIsTeamDropdownOpen(false);
+    try {
+      switchTeam(teamId);
+      setIsTeamDropdownOpen(false);
+    } catch (error) {
+      console.error("Failed to switch team:", error);
+    }
   };
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-white/80 backdrop-blur-sm dark:bg-gray-900/80 dark:border-gray-700">
       <div className="flex items-center justify-between px-4 py-3 sm:px-6">
-        {/* LEFT SECTION  */}
-        <div className="flex items-center gap-3">
+        {/* LEFT SECTION */}
+        <div className="flex items-center gap-3 flex-1">
           {/* Hamburger Menu (Mobile) */}
           <button
             onClick={toggleSidebar}
@@ -58,45 +90,48 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
             <Menu className="h-5 w-5 text-gray-600 dark:text-gray-300" />
           </button>
 
-          {/* CENTER: SEARCH*/}
-          <div className="flex-1 max-w-md mx-4 hidden md:block">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search..."
-                className="w-full px-4 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-400"
-              />
-            </div>
+          {/* ✅ Logo — Search ki jagah */}
+          <div className="flex items-center gap-2">
+            <Zap className="h-16 w-16 text-primary-500" />
+            <span className="text-xl font-bold text-primary-500">NEXUS</span>
+            <span className="text-xs text-muted-foreground hidden sm:inline">
+              v1.0
+            </span>
           </div>
+        </div>
 
+        {/* RIGHT SECTION */}
+        <div className="flex items-center gap-2">
           {/* Team Switcher */}
-          {currentTeam && (
-            <div className="relative">
+          {(currentTeam || teams.length > 0) && (
+            <div className="relative ml-auto sm:ml-0" ref={teamDropdownRef}>
               <button
                 onClick={() => setIsTeamDropdownOpen(!isTeamDropdownOpen)}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                aria-expanded={isTeamDropdownOpen}
+                aria-haspopup="true"
               >
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                  {currentTeam.name}
+                  {currentTeam?.name || "Select Team"}
                 </span>
                 <ChevronDown className="h-4 w-4 text-gray-500 dark:text-gray-400" />
               </button>
 
-              {/* Dropdown */}
+              {/* ✅ Dropdown — Center aligned */}
               {isTeamDropdownOpen && (
-                <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-border dark:border-gray-700 py-1 z-[100]">
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-48 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-border dark:border-gray-700 py-1 z-[100]">
                   {teams.map((team) => (
                     <button
                       key={team.id}
                       onClick={() => handleTeamSwitch(team.id)}
                       className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${
-                        currentTeam.id === team.id
+                        currentTeam?.id === team.id
                           ? "bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400"
                           : "text-gray-700 dark:text-gray-200"
                       }`}
                     >
                       {team.name}
-                      {currentTeam.id === team.id && (
+                      {currentTeam?.id === team.id && (
                         <span className="ml-2 text-xs text-primary-500">✓</span>
                       )}
                     </button>
@@ -105,10 +140,6 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
               )}
             </div>
           )}
-        </div>
-
-        {/*  RIGHT SECTION  */}
-        <div className="flex items-center gap-2">
           {/* Dark Mode Toggle */}
           <button
             onClick={toggleDarkMode}
@@ -123,14 +154,22 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
           </button>
 
           {/* Notifications */}
-          <button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors relative">
+          <button
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors relative"
+            aria-label="Notifications"
+          >
             <Bell className="h-5 w-5 text-gray-600 dark:text-gray-300" />
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
 
           {/* User Profile */}
-          <div className="relative group">
-            <button className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <div className="relative" ref={profileDropdownRef}>
+            <button
+              onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+              className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              aria-expanded={isProfileDropdownOpen}
+              aria-haspopup="true"
+            >
               <div className="w-8 h-8 rounded-full bg-primary-500 text-white flex items-center justify-center text-sm font-medium">
                 {user?.name?.charAt(0) || "U"}
               </div>
@@ -140,34 +179,36 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
             </button>
 
             {/* Profile Dropdown */}
-            <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-border dark:border-gray-700 py-1 hidden group-hover:block z-[100]">
-              <div className="px-4 py-2 border-b border-border dark:border-gray-700">
-                <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  {user?.name}
-                </p>
-                <p className="text-xs text-muted-foreground dark:text-gray-400">
-                  {user?.email}
-                </p>
-                <p className="text-xs text-primary-500 capitalize">
-                  {user?.role}
-                </p>
+            {isProfileDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-border dark:border-gray-700 py-1 z-[100]">
+                <div className="px-4 py-2 border-b border-border dark:border-gray-700">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                    {user?.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground dark:text-gray-400">
+                    {user?.email}
+                  </p>
+                  <p className="text-xs text-primary-500 capitalize">
+                    {user?.role}
+                  </p>
+                </div>
+                <button className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                  <User className="h-4 w-4" />
+                  Profile
+                </button>
+                <button className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                  <Settings className="h-4 w-4" />
+                  Settings
+                </button>
+                <button
+                  onClick={() => logout()}
+                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </button>
               </div>
-              <button className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                <User className="h-4 w-4" />
-                Profile
-              </button>
-              <button className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                <Settings className="h-4 w-4" />
-                Settings
-              </button>
-              <button
-                onClick={logout}
-                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-              >
-                <LogOut className="h-4 w-4" />
-                Logout
-              </button>
-            </div>
+            )}
           </div>
         </div>
       </div>
