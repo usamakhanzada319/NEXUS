@@ -121,7 +121,7 @@ export const SlackConfig: React.FC = () => {
                 type="url"
                 value={webhookUrl}
                 onChange={(e) => setWebhookUrl(e.target.value)}
-                placeholder="https://hooks.slack.com/services/YOUR_WEBHOOK_URL"
+                placeholder="YOUR_WEBHOOK_URL"
                 className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary-500"
                 disabled={isSaved}
               />
