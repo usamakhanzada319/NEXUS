@@ -5,7 +5,6 @@ import {
   Webhook,
   Plus,
   Trash2,
-  Save,
   X,
   Link2,
   Zap,
@@ -249,7 +248,12 @@ export const WebhookConfig: React.FC = () => {
                 >
                   {webhook.isActive ? "Active" : "Inactive"}
                 </button>
-                <button onClick={() => handleRemove(webhook.id)}></button>
+                <button
+                  onClick={() => handleRemove(webhook.id)}
+                  className="p-1 text-red-500 hover:bg-red-50 rounded-lg dark:hover:bg-red-900/20"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
               </div>
             </div>
           ))}

@@ -77,7 +77,7 @@ export const ExportButton: React.FC<ExportButtonProps> = ({
             onClick={() => handleExport("csv")}
             className="w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           >
-            {" "}
+            
             <FileSpreadsheet className="h-4 w-4" />
             Export as CSV
           </button>

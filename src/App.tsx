@@ -23,6 +23,7 @@ import { ProviderHealth } from "./pages/ProviderHealth";
 import { SecuritySetting } from "./pages/SecuritySettings";
 import { Billing } from "./pages/Billing";
 import { Settings } from "./pages/Settings";
+import { NotFound } from "./pages/NotFound";
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -188,7 +189,7 @@ function App() {
                     />
                   </Route>
 
-                  <Route path="*" element={<Navigate to="/" replace />} />
+                  <Route path="*" element={<NotFound />} />
                 </Routes>
                 <ToastContainer />
               </NotificationProvider>
