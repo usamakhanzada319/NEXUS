@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useTeam } from "../context/TeamContext";
 import { apiClient } from "../api/client";
@@ -17,6 +17,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { DashboardStats, AuditLog } from "../types";
+// TODO=> active All actions
 
 export const Dashboard: React.FC = () => {
   const { user, isAdmin } = useAuth();
@@ -30,8 +31,7 @@ export const Dashboard: React.FC = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [recentActivities, setRecentActivities] = useState<AuditLog[]>([]);
-
-  // FETCH RECENT ACTIVITIES
+  // Featcj Activities
 
   useEffect(() => {
     const fetchActivities = async () => {
@@ -44,10 +44,9 @@ export const Dashboard: React.FC = () => {
     };
     fetchActivities();
   }, []);
+  // Action Icon Mapping
 
-  // ACTION ICON MAPPING
-
-  const getActionIcon = (action: string) => {
+  const getActionIcon = useCallback((action: string) => {
     switch (action) {
       case "login":
         return <LogIn className="h-4 w-4 text-green-500" />;
@@ -69,11 +68,10 @@ export const Dashboard: React.FC = () => {
       default:
         return <Clock className="h-4 w-4 text-gray-500" />;
     }
-  };
+  }, []);
+  // Format Action
 
-  // FORMAT ACTION TEXT
-
-  const formatAction = (action: string): string => {
+  const formatAction = useCallback((action: string): string => {
     const map: Record<string, string> = {
       login: "logged in",
       logout: "logged out",
@@ -91,11 +89,11 @@ export const Dashboard: React.FC = () => {
       spend_alert: "spend alert triggered",
     };
     return map[action] || action.replace(/_/g, " ");
-  };
+  }, []);
 
-  // FORMAT TIME
+  // Format Time
 
-  const formatTime = (timestamp: string) => {
+  const formatTime = useCallback((timestamp: string) => {
     const diff = Date.now() - new Date(timestamp).getTime();
     const minutes = Math.floor(diff / 60000);
     const hours = Math.floor(minutes / 60);
@@ -105,9 +103,8 @@ export const Dashboard: React.FC = () => {
     if (minutes < 60) return `${minutes}m ago`;
     if (hours < 24) return `${hours}h ago`;
     return `${days}d ago`;
-  };
-
-  // FETCH STATS
+  }, []);
+  // Fetch Stats
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -157,44 +154,48 @@ export const Dashboard: React.FC = () => {
     fetchStats();
   }, [currentTeam, teams]);
 
-  // STATS CARDS
+  // Stats Cards
 
-  const statsCards = [
-    {
-      title: "Total Spend",
-      value: `$${stats.totalSpend.toLocaleString()}`,
-      change: "+12.5%",
-      icon: DollarSign,
-      color: "blue" as const,
-    },
-    {
-      title: "Total Teams",
-      value: stats.totalTeams,
-      change: "+2 this month",
-      icon: Users,
-      color: "green" as const,
-    },
-    {
-      title: "Active Providers",
-      value: `${stats.activeProviders}/${stats.totalProviders}`,
-      change: `${stats.activeProviders} active`,
-      icon: Server,
-      color: "purple" as const,
-    },
-    {
-      title: "Anomalies",
-      value: stats.anomalies,
-      change: "No issues",
-      icon: AlertTriangle,
-      color: "orange" as const,
-    },
-  ];
+  const statsCards = useMemo(
+    () => [
+      {
+        title: "Total Spend",
+        value: `$${stats.totalSpend.toLocaleString()}`,
+        change: "+12.5%",
+        icon: <DollarSign className="h-5 w-5" />,
+        color: "blue" as const,
+      },
+      {
+        title: "Total Teams",
+        value: stats.totalTeams,
+        change: "+2 this month",
+        icon: <Users className="h-5 w-5" />,
+        color: "green" as const,
+      },
+      {
+        title: "Active Providers",
+        value: `${stats.activeProviders}/${stats.totalProviders}`,
+        change: `${stats.activeProviders} active`,
+        icon: <Server className="h-5 w-5" />,
+        color: "purple" as const,
+      },
+      {
+        title: "Anomalies",
+        value: stats.anomalies,
+        change: "No issues",
+        icon: <AlertTriangle className="h-5 w-5" />,
+        color: "orange" as const,
+      },
+    ],
+    [stats],
+  );
 
-  // LOADING STATE
+  // Render
 
   if (isLoading) {
     return <DashboardSkeleton />;
   }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -221,7 +222,7 @@ export const Dashboard: React.FC = () => {
         ))}
       </div>
 
-      {/* QUICK ACTIONS + RECENT ACTIVITY (2 COLUMNS) */}
+      {/* Quick Actions + Recent Activity */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Quick Actions */}
         <div className="bg-white dark:bg-gray-900 rounded-lg border border-border p-6">
@@ -271,7 +272,7 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* RECENT ACTIVITY */}
+        {/* Recent Activity */}
         <div className="bg-white dark:bg-gray-900 rounded-lg border border-border p-6">
           <h3 className="font-semibold mb-4 flex items-center gap-2">
             <Clock className="h-4 w-4 text-primary-500" />
@@ -295,6 +296,7 @@ export const Dashboard: React.FC = () => {
                     <p className="text-sm font-medium text-gray-900 dark:text-white">
                       {log.userName}
                       <span className="font-normal text-muted-foreground">
+                        {" "}
                         {formatAction(log.action)}
                       </span>
                     </p>

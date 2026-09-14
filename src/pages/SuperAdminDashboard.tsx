@@ -85,28 +85,28 @@ export const SuperAdminDashboard: React.FC = () => {
       title: "Total Spend (All Teams)",
       value: `$${totalSpend.toLocaleString()}`,
       change: "+12.5%",
-      icon: DollarSign,
+      icon: <DollarSign />,
       color: "blue" as const,
     },
     {
       title: "Total Teams",
       value: totalTeams,
       change: "+2 this month",
-      icon: Users,
+      icon: <Users />,
       color: "green" as const,
     },
     {
       title: "Total Providers",
       value: `${activeProviders}/${totalProviders}`,
       change: `${activeProviders} active`,
-      icon: Server,
+      icon: <Server />,
       color: "purple" as const,
     },
     {
       title: "Anomalies",
       value: "0",
       change: "No issues",
-      icon: AlertTriangle,
+      icon: <AlertTriangle />,
       color: "orange" as const,
     },
   ];
@@ -124,7 +124,7 @@ export const SuperAdminDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* ===== Header ===== */}
+      {/*  Header  */}
       <div>
         <h1 className="text-2xl font-bold">Super Admin Dashboard</h1>
         <p className="text-muted-foreground">
@@ -132,7 +132,7 @@ export const SuperAdminDashboard: React.FC = () => {
         </p>
       </div>
 
-      {/* ===== Stats Cards ===== */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statsCards.map((card) => (
           <StatsCard
@@ -146,7 +146,7 @@ export const SuperAdminDashboard: React.FC = () => {
         ))}
       </div>
 
-      {/* ===== All Teams Overview ===== */}
+      {/* All Teams Overview  */}
       <div className="bg-white dark:bg-gray-900 rounded-lg border border-border p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">All Teams Overview</h2>
@@ -201,7 +201,7 @@ export const SuperAdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* ===== All Providers ===== */}
+      {/*All Providers  */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Providers List */}
         <div className="bg-white dark:bg-gray-900 rounded-lg border border-border p-6">
@@ -274,8 +274,8 @@ export const SuperAdminDashboard: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Quick Actions */}
+      {/* TODO Active all Quick Actions   */}
+      {/* Quick Actions   */}
       <div className="bg-white dark:bg-gray-900 rounded-lg border border-border p-6">
         <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
         <div className="space-y-1">
