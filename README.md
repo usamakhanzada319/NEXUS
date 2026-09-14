@@ -51,52 +51,7 @@ A production-grade, multi-tenant AI Operations Dashboard built with **React 18**
 
 ---
 
-## Getting Started
-
-### Prerequisites
-
-- Node.js (v18+)
-- npm or yarn
-
-### Installation
-
-````bash
-# 1. Clone the repository
-git clone https://github.com/usamakhanzada319/NEXUS
-
-# 2. Navigate to project directory
-cd nexus-platform
-
-# 3. Install dependencies
-npm install
-
-# 4. Start development server
-npm run dev
-
----
-Login Credentials (Mock Mode)
-
-| Role                  | Email            | Password |
-| --------------------- | ---------------- | -------- |
-| **Super Admin**       | admin@nexus.com  | anything |
-| **Admin (Alpha)**     | admin@alpha.com  | anything |
-| **Team Lead (Alpha)** | lead@alpha.com   | anything |
-| **Viewer (Alpha)**    | viewer@alpha.com | anything |
-| **Admin (Beta)**      | admin@beta.com   | anything |
-| **Team Lead (Beta)**  | lead@beta.com    | anything |
-
-
----
-
-
-```markdown
-# 🏗️ NEXUS Architecture
-
-This document explains the architecture, folder structure, and data flow of the NEXUS platform.
-
----
-
-## Folder Structure
+## Project Structure
 
 src/
 ├── api/ # API layer (Mock/Real switch)
@@ -119,7 +74,90 @@ src/
 ├── utils/ # Utility functions
 ├── App.tsx # Root component
 └── main.tsx # Entry point
-````
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v18+)
+- npm or yarn
+
+### Installation
+
+`````bash
+# 1. Clone the repository
+git clone https://github.com/usamakhanzada319/NEXUS
+
+# 2. Navigate to project directory
+cd nexus-platform
+
+# 3. Install dependencies
+npm install
+
+# 4. Start development server
+npm run dev
+
+Open http://localhost:3000 in your browser.
+
+---
+Login Credentials (Mock Mode)
+
+| Role                  | Email            | Password |
+| --------------------- | ---------------- | -------- |
+| **Super Admin**       | admin@nexus.com  | anything |
+| **Admin (Alpha)**     | admin@alpha.com  | anything |
+| **Team Lead (Alpha)** | lead@alpha.com   | anything |
+| **Viewer (Alpha)**    | viewer@alpha.com | anything |
+| **Admin (Beta)**      | admin@beta.com   | anything |
+| **Team Lead (Beta)**  | lead@beta.com    | anything |
+
+
+
+
+
+
+Available Routes
+
+| Path                  | Page             | Access   |
+| --------------------- | ---------------- | -------- |
+| /login         | Login                  | Public |
+| /              | Dashboard              | Admin + Super Admin |
+| /super-admin   | Super Admin Dashboard  | Super Admin Only |
+| /teams         | Teams Management       |Admin + Super Admin|
+| /providers     | Providers Management   |	Admin + Super Admin
+| /admin/providers| Provider Assignment	  |Admin + Super Admin
+| /analytics      | Analytics	          |Admin + Super Admin
+| /budget	     | Budget Management	  |Admin + Super Admin
+| /provider-health| Provider Health        |	Admin + Super Admin
+| /security	     | Security Settings	  |Admin + Super Admin
+| /billing	     | Billing & Invoicing	  |Admin + Super Admin
+| /settings      | Integration Settings	  |Admin + Super Admin
+| *	             | 404 Not Found	      |Public
+
+````bash
+# 1. Clone the repository
+git clone https://github.com/usamakhanzada319/NEXUS
+
+# 2. Navigate to project directory
+cd nexus-platform
+
+# 3. Install dependencies
+npm install
+
+# 4. Start development server
+npm run dev
+
+
+
+Usama Jameel
+
+GitHub: @usamakhanzada319
+
+LinkedIn: https://www.linkedin.com/in/usama-jamil-b23a36202/
+---
+
 
 ---
 
@@ -181,7 +219,7 @@ App.tsx
 
 ### 🔜 Work On
 
-- Phase 11: Backend + Database (Node.js + PostgreSQL + Prisma)
+- Phase Final : Backend + Database (Node.js + PostgreSQL + Prisma)
 - Real API integration
 - User authentication with JWT
 - Database persistence
@@ -189,3 +227,4 @@ App.tsx
 ---
 
 **Made with ❤️ by Usama Jameel**
+`````
