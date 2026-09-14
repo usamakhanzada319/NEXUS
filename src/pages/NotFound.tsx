@@ -38,6 +38,9 @@ export const NotFound: React.FC = () => {
           </button>
         </div>
         {/* Help text */}
+        <p className="text-xs text-muted-foreground mt-6">
+          If you believe this is an error, please contact support.
+        </p>
       </div>
     </div>
   );

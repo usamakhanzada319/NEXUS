@@ -1,30 +1,69 @@
-import React, { useEffect } from "react";
+import React, { useEffect, Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { TeamProvider } from "./context/TeamContext";
 import { Layout } from "./components/common/Layout";
-import { Login } from "./pages/Login";
-import { Dashboard } from "./pages/Dashboard";
-import { SuperAdminDashboard } from "./pages/SuperAdminDashboard";
-import { Teams } from "./pages/Teams";
-import { Providers } from "./pages/Providers";
 import "./index.css";
-import { AdminTeamProviders } from "./pages/AdminTeamProviders";
 import {
   NotificationProvider,
   useNotification,
 } from "./context/NotificationContext";
-import { AuditLogs } from "./pages/AuditLogs";
 import { Toast } from "./components/common/Toast";
-import { Analytics } from "./pages/Analytics";
-import { Budget } from "./pages/Budget";
 import { BudgetProvider } from "./context/BudgetContext";
-import { ProviderHealth } from "./pages/ProviderHealth";
-import { SecuritySetting } from "./pages/SecuritySettings";
-import { Billing } from "./pages/Billing";
-import { Settings } from "./pages/Settings";
-import { NotFound } from "./pages/NotFound";
+import { ErrorBoundary } from "./components/common/ErrorBoundary";
+import { PageLoader } from "./components/common/Loaders";
 
+// Lazy load pages for better performance
+
+const Login = lazy(() =>
+  import("./pages/Login").then((m) => ({ default: m.Login })),
+);
+
+const Dashboard = lazy(() =>
+  import("./pages/Dashboard").then((m) => ({ default: m.Dashboard })),
+);
+const Teams = lazy(() =>
+  import("./pages/Teams").then((m) => ({ default: m.Teams })),
+);
+const Providers = lazy(() =>
+  import("./pages/Providers").then((m) => ({ default: m.Providers })),
+);
+const Analytics = lazy(() =>
+  import("./pages/Analytics").then((m) => ({ default: m.Analytics })),
+);
+const Budget = lazy(() =>
+  import("./pages/Budget").then((m) => ({ default: m.Budget })),
+);
+const ProviderHealth = lazy(() =>
+  import("./pages/ProviderHealth").then((m) => ({ default: m.ProviderHealth })),
+);
+const SecuritySetting = lazy(() =>
+  import("./pages/SecuritySettings").then((m) => ({
+    default: m.SecuritySetting,
+  })),
+);
+const Billing = lazy(() =>
+  import("./pages/Billing").then((m) => ({ default: m.Billing })),
+);
+const Settings = lazy(() =>
+  import("./pages/Settings").then((m) => ({ default: m.Settings })),
+);
+const NotFound = lazy(() =>
+  import("./pages/NotFound").then((m) => ({ default: m.NotFound })),
+);
+const SuperAdminDashboard = lazy(() =>
+  import("./pages/SuperAdminDashboard").then((m) => ({
+    default: m.SuperAdminDashboard,
+  })),
+);
+const AdminTeamProviders = lazy(() =>
+  import("./pages/AdminTeamProviders").then((m) => ({
+    default: m.AdminTeamProviders,
+  })),
+);
+const AuditLogs = lazy(() =>
+  import("./pages/AuditLogs").then((m) => ({ default: m.AuditLogs })),
+);
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -91,112 +130,132 @@ function App() {
 
   return (
     <div style={{ height: "100vh" }}>
-      <BrowserRouter>
-        <AuthProvider>
-          <TeamProvider>
-            <BudgetProvider>
-              <NotificationProvider>
-                <Routes>
-                  <Route path="/login" element={<Login />} />
+      <ErrorBoundary>
+        <BrowserRouter>
+          <AuthProvider>
+            <TeamProvider>
+              <BudgetProvider>
+                <Suspense fallback={<PageLoader />}>
+                  <NotificationProvider>
+                    <Routes>
+                      <Route path="/login" element={<Login />} />
 
-                  <Route
-                    element={
-                      <ProtectedRoute>
-                        <Layout />
-                      </ProtectedRoute>
-                    }
-                  >
-                    {/* Super Admin Only */}
-                    <Route
-                      path="/super-admin"
-                      element={
-                        <RoleBasedRoute allowedRoles={["super_admin"]}>
-                          <SuperAdminDashboard />
-                        </RoleBasedRoute>
-                      }
-                    />
+                      <Route
+                        element={
+                          <ProtectedRoute>
+                            <Layout />
+                          </ProtectedRoute>
+                        }
+                      >
+                        {/* Super Admin Only */}
+                        <Route
+                          path="/super-admin"
+                          element={
+                            <RoleBasedRoute allowedRoles={["super_admin"]}>
+                              <SuperAdminDashboard />
+                            </RoleBasedRoute>
+                          }
+                        />
 
-                    {/* Admin + Super Admin */}
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="/teams" element={<Teams />} />
-                    <Route path="/providers" element={<Providers />} />
-                    <Route
-                      path="/admin/providers"
-                      element={
-                        <RoleBasedRoute allowedRoles={["admin", "super_admin"]}>
-                          <AdminTeamProviders />
-                        </RoleBasedRoute>
-                      }
-                    />
-                    <Route
-                      path="/analytics"
-                      element={
-                        <RoleBasedRoute allowedRoles={["admin", "super_admin"]}>
-                          <Analytics />
-                        </RoleBasedRoute>
-                      }
-                    />
+                        {/* Admin + Super Admin */}
+                        <Route path="/" element={<Dashboard />} />
+                        <Route path="/teams" element={<Teams />} />
+                        <Route path="/providers" element={<Providers />} />
+                        <Route
+                          path="/admin/providers"
+                          element={
+                            <RoleBasedRoute
+                              allowedRoles={["admin", "super_admin"]}
+                            >
+                              <AdminTeamProviders />
+                            </RoleBasedRoute>
+                          }
+                        />
+                        <Route
+                          path="/analytics"
+                          element={
+                            <RoleBasedRoute
+                              allowedRoles={["admin", "super_admin"]}
+                            >
+                              <Analytics />
+                            </RoleBasedRoute>
+                          }
+                        />
 
-                    <Route
-                      path="/audit-logs"
-                      element={
-                        <RoleBasedRoute allowedRoles={["admin", "super_admin"]}>
-                          <AuditLogs />
-                        </RoleBasedRoute>
-                      }
-                    />
+                        <Route
+                          path="/audit-logs"
+                          element={
+                            <RoleBasedRoute
+                              allowedRoles={["admin", "super_admin"]}
+                            >
+                              <AuditLogs />
+                            </RoleBasedRoute>
+                          }
+                        />
 
-                    <Route
-                      path="/budget"
-                      element={
-                        <RoleBasedRoute allowedRoles={["admin", "super_admin"]}>
-                          <Budget />
-                        </RoleBasedRoute>
-                      }
-                    />
-                    <Route
-                      path="/provider-health"
-                      element={
-                        <RoleBasedRoute allowedRoles={["admin", "super_admin"]}>
-                          <ProviderHealth />
-                        </RoleBasedRoute>
-                      }
-                    />
-                    <Route
-                      path="/security"
-                      element={
-                        <RoleBasedRoute allowedRoles={["admin", "super_admin"]}>
-                          <SecuritySetting />
-                        </RoleBasedRoute>
-                      }
-                    />
-                    <Route
-                      path="/billing"
-                      element={
-                        <RoleBasedRoute allowedRoles={["admin", "super_admin"]}>
-                          <Billing />
-                        </RoleBasedRoute>
-                      }
-                    />
+                        <Route
+                          path="/budget"
+                          element={
+                            <RoleBasedRoute
+                              allowedRoles={["admin", "super_admin"]}
+                            >
+                              <Budget />
+                            </RoleBasedRoute>
+                          }
+                        />
+                        <Route
+                          path="/provider-health"
+                          element={
+                            <RoleBasedRoute
+                              allowedRoles={["admin", "super_admin"]}
+                            >
+                              <ProviderHealth />
+                            </RoleBasedRoute>
+                          }
+                        />
+                        <Route
+                          path="/security"
+                          element={
+                            <RoleBasedRoute
+                              allowedRoles={["admin", "super_admin"]}
+                            >
+                              <SecuritySetting />
+                            </RoleBasedRoute>
+                          }
+                        />
+                        <Route
+                          path="/billing"
+                          element={
+                            <RoleBasedRoute
+                              allowedRoles={["admin", "super_admin"]}
+                            >
+                              <Billing />
+                            </RoleBasedRoute>
+                          }
+                        />
 
-                    <Route
-                      path="/settings"
-                      element={
-                        <RoleBasedRoute allowedRoles={["admin", "super_admin"]}>
-                          <Settings />
-                        </RoleBasedRoute>
-                      }
-                    />
-                  </Route>
+                        <Route
+                          path="/settings"
+                          element={
+                            <RoleBasedRoute
+                              allowedRoles={["admin", "super_admin"]}
+                            >
+                              <Settings />
+                            </RoleBasedRoute>
+                          }
+                        />
+                      </Route>
 
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-                <ToastContainer />
-              </NotificationProvider>
-            </BudgetProvider>
-          </TeamProvider>
-        </AuthProvider>
-      </BrowserRouter>
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                    <ToastContainer />
+                  </NotificationProvider>
+                </Suspense>
+              </BudgetProvider>
+            </TeamProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </ErrorBoundary>
     </div>
   );
 }

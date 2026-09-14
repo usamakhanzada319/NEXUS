@@ -3,6 +3,8 @@ import { Plus, Edit, Trash2, Users } from "lucide-react";
 import { apiClient } from "../api/client";
 import { Team } from "../types";
 import { useAuth } from "../context/AuthContext";
+import { TableSkeleton } from "../components/common/Loaders";
+import { Skeleton } from "../components/common/Skeleton";
 
 export const Teams: React.FC = () => {
   const { isAdmin, user } = useAuth();
@@ -40,9 +42,13 @@ export const Teams: React.FC = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">Loading...</div>
-    );
+    <div className="space-y-6">
+      <div>
+        <Skeleton variant="text" width="20%" height={28} ClassName="mb-2" />
+        <Skeleton variant="text" width="40%" height={16} />
+      </div>
+      <TableSkeleton rows={5} cols={4} />
+    </div>;
   }
   return (
     <div className="space-y-6">

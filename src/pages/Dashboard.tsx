@@ -1,8 +1,9 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useTeam } from "../context/TeamContext";
 import { apiClient } from "../api/client";
 import { StatsCard } from "../components/dashboard/StatsCard";
+import { DashboardSkeleton } from "../components/common/Loaders";
 import {
   DollarSign,
   TrendingUp,
@@ -14,7 +15,6 @@ import {
   Clock,
   LogIn,
   LogOut,
-  Key,
 } from "lucide-react";
 import { DashboardStats, AuditLog } from "../types";
 
@@ -193,16 +193,8 @@ export const Dashboard: React.FC = () => {
   // LOADING STATE
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Activity className="h-5 w-5 animate-spin" />
-          Loading...
-        </div>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
-
   return (
     <div className="space-y-6">
       {/* Header */}

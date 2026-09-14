@@ -6,10 +6,8 @@ import {
   Zap,
   DollarSign,
   Clock,
-  TrendingUp,
   Server,
   BarChart,
-  PieChart,
   Table,
 } from "lucide-react";
 
@@ -19,6 +17,12 @@ import {
   ModelAnalytics,
   AnalyticsStats,
 } from "../types";
+import {
+  ChartSkeleton,
+  TableSkeleton,
+  CardListSkeleton,
+} from "../components/common/Loaders";
+import { Skeleton } from "../components/common/Skeleton";
 
 export const Analytics: React.FC = () => {
   const { isAdmin } = useAuth();
@@ -64,11 +68,14 @@ export const Analytics: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary-500 border-t-transparent" />
-          Loading analytics...
+      <div className="space-y-6">
+        <div>
+          <Skeleton variant="text" width="30%" height={28} ClassName="mb-2" />
+          <Skeleton variant="text" width="50%" height={16} />
         </div>
+        <CardListSkeleton count={4} />
+        <ChartSkeleton />
+        <TableSkeleton rows={5} cols={6} />
       </div>
     );
   }
