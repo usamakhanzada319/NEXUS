@@ -273,6 +273,7 @@ export const Dashboard: React.FC = () => {
         </div>
 
         {/* Recent Activity */}
+
         <div className="bg-white dark:bg-gray-900 rounded-lg border border-border p-6">
           <h3 className="font-semibold mb-4 flex items-center gap-2">
             <Clock className="h-4 w-4 text-primary-500" />
@@ -296,7 +297,6 @@ export const Dashboard: React.FC = () => {
                     <p className="text-sm font-medium text-gray-900 dark:text-white">
                       {log.userName}
                       <span className="font-normal text-muted-foreground">
-                        {" "}
                         {formatAction(log.action)}
                       </span>
                     </p>

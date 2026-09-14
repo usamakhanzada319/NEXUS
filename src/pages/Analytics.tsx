@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
-import { useAuth } from "../context/AuthContext";
 import { apiClient } from "../api/client";
 import {
   Activity,
@@ -22,7 +21,7 @@ import {
 } from "../components/common/Loaders";
 
 export const Analytics: React.FC = () => {
-  const { isAdmin } = useAuth();
+  // const { isAdmin } = useAuth();
   const [stats, setStats] = useState<AnalyticsStats | null>(null);
   const [providerAnalytics, setProviderAnalytics] = useState<
     ProviderAnalytics[]

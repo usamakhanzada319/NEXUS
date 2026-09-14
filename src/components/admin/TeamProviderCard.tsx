@@ -33,7 +33,7 @@ interface TeamProviderCardProps {
 }
 
 export const TeamProviderCard: React.FC<TeamProviderCardProps> = memo(
-  ({ provider, teamId, onToggle, onUpdate, onRemove }) => {
+  ({ provider, onToggle, onUpdate, onRemove }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [spendLimit, setSpendLimit] = useState(provider.spendLimit);
     const [models, setModels] = useState(provider.modelsAssigned.join(", "));

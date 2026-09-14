@@ -53,27 +53,29 @@ A production-grade, multi-tenant AI Operations Dashboard built with **React 18**
 
 ## Project Structure
 
-src/
-├── api/ # API layer (Mock/Real switch)
-├── components/ # Reusable UI components
-│ ├── admin/ # Admin panel components
-│ ├── billing/ # Billing components
-│ ├── budget/ # Budget components
-│ ├── charts/ # Chart components
-│ ├── common/ # Common components (Layout, Header, etc.)
-│ ├── dashboard/ # Dashboard components
-│ ├── integrations/ # Integration components
-│ ├── provider/ # Provider components
-│ ├── security/ # Security components
-│ └── teams/ # Team components
-├── context/ # Global state management
-├── hooks/ # Custom React hooks
-├── pages/ # Page components
-├── services/ # Business logic services
-├── types/ # TypeScript type definitions
-├── utils/ # Utility functions
-├── App.tsx # Root component
-└── main.tsx # Entry point
+| Folder/File                    | Purpose                                  |
+| ------------------------------ | ---------------------------------------- |
+| `src/`                         | Root source folder                       |
+| `src/api/`                     | API layer (Mock/Real switch)             |
+| `src/components/`              | Reusable UI components                   |
+| `src/components/admin/`        | Admin panel components                   |
+| `src/components/billing/`      | Billing components                       |
+| `src/components/budget/`       | Budget components                        |
+| `src/components/charts/`       | Chart components                         |
+| `src/components/common/`       | Common components (Layout, Header, etc.) |
+| `src/components/dashboard/`    | Dashboard components                     |
+| `src/components/integrations/` | Integration components                   |
+| `src/components/provider/`     | Provider components                      |
+| `src/components/security/`     | Security components                      |
+| `src/components/teams/`        | Team components                          |
+| `src/context/`                 | Global state management                  |
+| `src/hooks/`                   | Custom React hooks                       |
+| `src/pages/`                   | Page components                          |
+| `src/services/`                | Business logic services                  |
+| `src/types/`                   | TypeScript type definitions              |
+| `src/utils/`                   | Utility functions                        |
+| `src/App.tsx`                  | Root component                           |
+| `src/main.tsx`                 | Entry point                              |
 
 ---
 
@@ -117,24 +119,23 @@ Login Credentials (Mock Mode)
 
 
 
+## Available Routes
 
-Available Routes
-
-| Path                  | Page             | Access   |
-| --------------------- | ---------------- | -------- |
-| /login         | Login                  | Public |
-| /              | Dashboard              | Admin + Super Admin |
-| /super-admin   | Super Admin Dashboard  | Super Admin Only |
-| /teams         | Teams Management       |Admin + Super Admin|
-| /providers     | Providers Management   |	Admin + Super Admin
-| /admin/providers| Provider Assignment	  |Admin + Super Admin
-| /analytics      | Analytics	          |Admin + Super Admin
-| /budget	     | Budget Management	  |Admin + Super Admin
-| /provider-health| Provider Health        |	Admin + Super Admin
-| /security	     | Security Settings	  |Admin + Super Admin
-| /billing	     | Billing & Invoicing	  |Admin + Super Admin
-| /settings      | Integration Settings	  |Admin + Super Admin
-| *	             | 404 Not Found	      |Public
+| Path | Page | Access |
+|------|------|--------|
+| `/login` | Login | Public |
+| `/` | Dashboard | Admin + Super Admin |
+| `/super-admin` | Super Admin Dashboard | Super Admin Only |
+| `/teams` | Teams Management | Admin + Super Admin |
+| `/providers` | Providers Management | Admin + Super Admin |
+| `/admin/providers` | Provider Assignment | Admin + Super Admin |
+| `/analytics` | Analytics | Admin + Super Admin |
+| `/budget` | Budget Management | Admin + Super Admin |
+| `/provider-health` | Provider Health | Admin + Super Admin |
+| `/security` | Security Settings | Admin + Super Admin |
+| `/billing` | Billing & Invoicing | Admin + Super Admin |
+| `/settings` | Integration Settings | Admin + Super Admin |
+| `*` | 404 Not Found | Public |
 
 ````bash
 # 1. Clone the repository

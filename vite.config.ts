@@ -80,4 +80,11 @@ export default defineConfig({
   optimizeDeps: {
     include: ["react", "react-dom", "recharts"],
   },
+
+  test: {
+    global: true,
+    environment: "jsdom",
+    setupFiles: "./src/test/setup.ts",
+    css: true,
+  },
 });
