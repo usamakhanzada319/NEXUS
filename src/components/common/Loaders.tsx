@@ -18,7 +18,7 @@ export const StateCardSkeleton: React.FC = () => (
       <Skeleton variant="rounded" width={40} height={40} />
       <Skeleton variant="text" width={60} height={16} />
     </div>
-    <Skeleton variant="text" width="60%" height={28} ClassName="mb-2" />
+    <Skeleton variant="text" width="60%" height={28} className="mb-2" />
     <Skeleton variant="text" width="40%" height={14} />
   </div>
 );
@@ -57,7 +57,7 @@ export const TableSkeleton: React.FC<{ rows?: number; cols?: number }> = ({
 
 export const ChartSkeleton: React.FC = () => (
   <div className="bg-white dark:bg-gray-900 rounded-lg border border-border p-6">
-    <Skeleton variant="text" width="40%" height={24} ClassName="mb-6" />
+    <Skeleton variant="text" width="40%" height={24} className="mb-6" />
     <div className="h-64 flex items-end justify-between gap-2">
       {Array.from({ length: 8 }).map((_, i) => (
         <Skeleton
@@ -87,7 +87,7 @@ export const DashboardSkeleton: React.FC = () => (
   <div className="space-y-6">
     {/* header */}
     <div>
-      <Skeleton variant="text" width="30%" height={28} ClassName="mb-2" />
+      <Skeleton variant="text" width="30%" height={28} className="mb-2" />
       <Skeleton variant="text" width="50%" height={16} />
     </div>
     {/* states */}

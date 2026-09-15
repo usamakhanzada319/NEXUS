@@ -1,12 +1,12 @@
 interface SkeletonProps {
-  ClassName?: string;
+  className?: string;
   width?: string | number;
-  height: string | number;
-  variant: "text" | "circular" | "rectangular" | "rounded";
+  height?: string | number;
+  variant?: "text" | "circular" | "rectangular" | "rounded";
 }
 
 export const Skeleton: React.FC<SkeletonProps> = ({
-  ClassName = "",
+  className = "",
   width,
   height,
   variant = "text",
@@ -26,7 +26,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
   };
   return (
     <div
-      className={`${baseClasses} ${variantClasses[variant]} ${ClassName} `}
+      className={`${baseClasses} ${variantClasses[variant]} ${className} `}
       style={style}
     />
   );
