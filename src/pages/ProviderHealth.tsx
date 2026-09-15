@@ -14,7 +14,6 @@ export const ProviderHealth: React.FC = () => {
     isLoading,
     isChecking,
     refreshHealth,
-    runHealthCheck,
     toggleFallback,
   } = useProviderHealth();
 

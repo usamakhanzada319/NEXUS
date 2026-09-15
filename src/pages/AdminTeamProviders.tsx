@@ -2,24 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useTeam } from "../context/TeamContext";
 import { apiClient } from "../api/client";
-import { Team, Provider, TeamProvider, AuditLog } from "../types";
+import { Provider, TeamProvider } from "../types";
 import { TeamProviderCard } from "../components/admin/TeamProviderCard";
-import {
-  Users,
-  Server,
-  Search,
-  X,
-  Clock,
-  LogIn,
-  LogOut,
-  Key,
-  AlertTriangle,
-  Activity,
-} from "lucide-react";
+import { Users, Server } from "lucide-react";
 
 export const AdminTeamProviders: React.FC = () => {
   const { isAdmin } = useAuth();
-  const { teams, currentTeam, switchTeam } = useTeam();
+  const { teams, currentTeam } = useTeam();
   const [providers, setProviders] = useState<Provider[]>([]);
   const [teamProviders, setTeamProviders] = useState<TeamProvider[]>([]);
   const [selectedTeamId, setSelectedTeamId] = useState<string>(
@@ -31,7 +20,7 @@ export const AdminTeamProviders: React.FC = () => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const [providersData, teamsData] = await Promise.all([
+        const [providersData] = await Promise.all([
           apiClient.getProviders(),
           apiClient.getTeams(),
         ]);

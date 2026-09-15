@@ -1,15 +1,15 @@
-import {  useState } from "react";
+import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useSecurity } from "../hooks/useSecurity";
 import { MFAConfig } from "../components/security/MFAConfig";
 import { BackupCodes } from "../components/security/BackupCodes";
 import { PasswordPolicy } from "../components/security/PasswordPolicy";
 import { LoginHistory } from "../components/security/LoginHistory";
-import { Shield, Key, History, Lock,  } from "lucide-react";
+import { Shield, Key, History, Lock } from "lucide-react";
 
 export const SecuritySetting: React.FC = () => {
   const { user, isAdmin } = useAuth();
-  const { mfaConfig, isLoading, refreshSecurity } = useSecurity();
+  const { isLoading } = useSecurity();
 
   const [activeTab, setActiveTab] = useState<
     "mfa" | "backup" | "password" | "history"

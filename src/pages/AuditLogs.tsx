@@ -1,18 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { apiClient } from "../api/client";
-import { AuditLog, AuditAction } from "../types";
+import { AuditLog } from "../types";
 
 import {
   Search,
   Filter,
-  Download,
   Clock,
   LogIn,
   LogOut,
   Users,
   Server,
-  Key,
   AlertTriangle,
   Activity,
   ChevronLeft,

@@ -27,11 +27,11 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
   const [isTeamDropdownOpen, setIsTeamDropdownOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
-  // ✅ Refs for outside click detection
+  // Refs for outside click detection
   const teamDropdownRef = useRef<HTMLDivElement>(null);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
 
-  // ✅ Dark mode effect
+  // Dark mode effect
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add("dark");
