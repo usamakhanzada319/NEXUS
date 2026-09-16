@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useTeam } from "../../context/TeamContext";
+import { Team } from "../../types";
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -42,7 +43,7 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
     }
   }, [darkMode]);
 
-  // ✅ Outside click detection
+  // Outside click detection
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -90,7 +91,7 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
             <Menu className="h-5 w-5 text-gray-600 dark:text-gray-300" />
           </button>
 
-          {/* ✅ Logo — Search ki jagah */}
+          {/* Logo — Search ki jagah */}
           <div className="flex items-center gap-2">
             <Zap className="h-16 w-16 text-primary-500" />
             <span className="text-xl font-bold text-primary-500">NEXUS</span>
@@ -117,10 +118,10 @@ export const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
                 <ChevronDown className="h-4 w-4 text-gray-500 dark:text-gray-400" />
               </button>
 
-              {/* ✅ Dropdown — Center aligned */}
+              {/* Dropdown — Center aligned */}
               {isTeamDropdownOpen && (
                 <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-48 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-border dark:border-gray-700 py-1 z-[100]">
-                  {teams.map((team) => (
+                  {teams.map((team: Team) => (
                     <button
                       key={team.id}
                       onClick={() => handleTeamSwitch(team.id)}

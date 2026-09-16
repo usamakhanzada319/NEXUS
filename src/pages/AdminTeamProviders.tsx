@@ -5,6 +5,7 @@ import { apiClient } from "../api/client";
 import { Provider, TeamProvider } from "../types";
 import { TeamProviderCard } from "../components/admin/TeamProviderCard";
 import { Users, Server } from "lucide-react";
+import { Team } from "../types";
 
 export const AdminTeamProviders: React.FC = () => {
   const { isAdmin } = useAuth();
@@ -173,7 +174,7 @@ export const AdminTeamProviders: React.FC = () => {
             onChange={(e) => setSelectedTeamId(e.target.value)}
             className="px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
-            {teams.map((team) => (
+            {teams.map((team: Team) => (
               <option key={team.id} value={team.id}>
                 {team.name}
               </option>

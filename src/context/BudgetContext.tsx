@@ -1,5 +1,6 @@
 import React, {
   createContext,
+  useContext,
   useState,
   useEffect,
   ReactNode,
@@ -8,7 +9,7 @@ import React, {
 import { TeamBudget, BudgetAlert } from "../types";
 import { apiClient } from "../api/client";
 
-export interface BudgetContextType {
+interface BudgetContextType {
   budgets: TeamBudget[];
   alerts: BudgetAlert[];
   isLoading: boolean;
@@ -20,9 +21,7 @@ export interface BudgetContextType {
   overallPercent: number;
 }
 
-export const BudgetContext = createContext<BudgetContextType | undefined>(
-  undefined,
-);
+const BudgetContext = createContext<BudgetContextType | undefined>(undefined);
 
 export const BudgetProvider: React.FC<{ children: ReactNode }> = ({
   children,
@@ -76,7 +75,6 @@ export const BudgetProvider: React.FC<{ children: ReactNode }> = ({
     }
   }, []);
 
-  // Initial load
   useEffect(() => {
     refreshBudgets();
   }, [refreshBudgets]);
@@ -102,4 +100,12 @@ export const BudgetProvider: React.FC<{ children: ReactNode }> = ({
       {children}
     </BudgetContext.Provider>
   );
+};
+
+export const useBudget = () => {
+  const context = useContext(BudgetContext);
+  if (!context) {
+    throw new Error("useBudget must be used within a BudgetProvider");
+  }
+  return context;
 };

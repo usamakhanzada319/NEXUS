@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useTeam } from "../context/useTeam";
+import { useTeam } from "../context/TeamContext";
 import { apiClient } from "../api/client";
 import { Invoice, PaymentMethod, BillingSummary } from "../types";
 import { InvoiceCard } from "../components/billing/InvoiceCard";

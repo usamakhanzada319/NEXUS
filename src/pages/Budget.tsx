@@ -4,6 +4,7 @@ import { useBudget } from "../context/BudgetContext";
 import { BudgetCard } from "../components/budget/BudgetCard";
 import { BudgetAlertComponent } from "../components/budget/BudgetAlert";
 import { DollarSign, AlertTriangle, TrendingUp, RefreshCw } from "lucide-react";
+import { BudgetAlert, TeamBudget } from "../types";
 
 export const Budget: React.FC = () => {
   const { isAdmin } = useAuth();
@@ -105,7 +106,7 @@ export const Budget: React.FC = () => {
             Budget Alerts ({alerts.length})
           </h3>
           <div className="space-y-2">
-            {alerts.map((alert) => (
+            {alerts.map((alert: BudgetAlert) => (
               <BudgetAlertComponent
                 key={alert.id}
                 alert={alert}
@@ -117,7 +118,7 @@ export const Budget: React.FC = () => {
       )}
       {/* Budget Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {budgets.map((budget) => (
+        {budgets.map((budget: TeamBudget) => (
           <BudgetCard
             key={budget.teamId}
             budget={budget}

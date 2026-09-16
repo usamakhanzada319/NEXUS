@@ -1,5 +1,6 @@
 import React, {
   createContext,
+  useContext,
   useState,
   useEffect,
   ReactNode,
@@ -8,8 +9,7 @@ import React, {
 import { Team } from "../types";
 import { apiClient } from "../api/client";
 
-// Export context
-export interface TeamContextType {
+interface TeamContextType {
   currentTeam: Team | null;
   setCurrentTeam: (team: Team | null) => void;
   teams: Team[];
@@ -18,9 +18,7 @@ export interface TeamContextType {
   switchTeam: (teamId: string) => void;
 }
 
-export const TeamContext = createContext<TeamContextType | undefined>(
-  undefined,
-);
+const TeamContext = createContext<TeamContextType | undefined>(undefined);
 
 export const TeamProvider: React.FC<{ children: ReactNode }> = ({
   children,
@@ -51,17 +49,16 @@ export const TeamProvider: React.FC<{ children: ReactNode }> = ({
       if (team) {
         setCurrentTeam(team);
         localStorage.setItem("nexus_current_team", teamId);
+        console.log("Team switched to:", team.name);
       }
     },
     [teams],
   );
 
-  // Initial load
   useEffect(() => {
     refreshTeams();
   }, [refreshTeams]);
 
-  // Load saved team
   useEffect(() => {
     const savedTeamId = localStorage.getItem("nexus_current_team");
     if (savedTeamId && teams.length > 0) {
@@ -86,4 +83,12 @@ export const TeamProvider: React.FC<{ children: ReactNode }> = ({
       {children}
     </TeamContext.Provider>
   );
+};
+
+export const useTeam = () => {
+  const context = useContext(TeamContext);
+  if (!context) {
+    throw new Error("useTeam must be used within a TeamProvider");
+  }
+  return context;
 };
