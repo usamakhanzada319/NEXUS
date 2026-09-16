@@ -11,7 +11,7 @@ describe("useLocalStorage", () => {
     localStorage.clear(); //remove all prev data , for tests dont affect(isolation)
     vi.clearAllMocks(); //all mocked functions call history reset
     vi.spyOn(Storage.prototype, "setItem"); // (for new spy l )
-    vi.spyOn(Storage.prototype, "getItem"); // (if getItem  test )
+    // vi.spyOn(Storage.prototype, "getItem"); // (if getItem  test )
   });
 
   // Test 1: Initial value => return initial value when localStorage is Empty
@@ -40,9 +40,9 @@ describe("useLocalStorage", () => {
   //  Test 3: Read stored value
 
   it("reads value from localStorage on mount", () => {
-    localStorage.getItem = vi
-      .fn()
-      .mockReturnValue(JSON.stringify("stored-value"));
+    vi.mocked(localStorage.getItem).mockReturnValue(
+      JSON.stringify("stored-value"),
+    );
     const { result } = renderHook(() => useLocalStorage("test-key", "initial"));
     expect(result.current[0]).toBe("stored-value");
   });
@@ -50,7 +50,8 @@ describe("useLocalStorage", () => {
   //  Test 4: Function updater
 
   it("supports function updater", () => {
-    const { result } = renderHook(() => useLocalStorage("counter", 0));
+    vi.mocked(localStorage.getItem).mockReturnValue(null);
+    const { result } = renderHook(() => useLocalStorage("count", 0));
     act(() => {
       result.current[1]((prev) => prev + 1);
     });

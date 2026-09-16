@@ -43,6 +43,6 @@ describe("NotFound", () => {
   it('navigates back when "Go Back" is clicked', () => {
     render(<NotFound />);
     fireEvent.click(screen.getByText("Go Back"));
-    expect(mockNavigate).toHaveBeenCalledWith("-1");
+    expect(mockNavigate).toHaveBeenCalledWith(-1);
   });
 });
