@@ -11,10 +11,6 @@ export const LoginHistory: React.FC<LoginHistoryProps> = ({ userId }) => {
   const [history, setHistory] = useState<LoginHistoryType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    loadHistory();
-  }, []);
-
   const loadHistory = async () => {
     setIsLoading(true);
     try {
@@ -26,6 +22,11 @@ export const LoginHistory: React.FC<LoginHistoryProps> = ({ userId }) => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadHistory();
+  }, [userId]);
+
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
     return date.toLocaleString("en-US", {
@@ -74,6 +75,7 @@ export const LoginHistory: React.FC<LoginHistoryProps> = ({ userId }) => {
           Refresh
         </button>
       </div>
+
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -111,7 +113,7 @@ export const LoginHistory: React.FC<LoginHistoryProps> = ({ userId }) => {
                 <td className="py-2">
                   <span
                     className={`flex items-center gap-1 px-2 py-0.5 text-xs rounded-full ${
-                      entry.status
+                      entry.status === "success"
                         ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
                         : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
                     }`}

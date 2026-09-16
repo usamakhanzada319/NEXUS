@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useTeam } from "../context/TeamContext";
+import { useTeam } from "../context/useTeam";
 import { apiClient } from "../api/client";
-
 import { Invoice, PaymentMethod, BillingSummary } from "../types";
-
 import { InvoiceCard } from "../components/billing/InvoiceCard";
 import { PaymentMethods } from "../components/billing/PaymentMethods";
 import { UsageReport } from "../components/billing/UsageReport";
-
 import {
   DollarSign,
   FileText,
@@ -30,17 +27,15 @@ export const Billing: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"invoices" | "payment" | "usage">(
     "invoices",
   );
-  useEffect(() => {
-    fetchBillingData();
-  }, [currentTeam]);
 
+  // ✅ Circular reference fix — function useEffect se pehle
   const fetchBillingData = async () => {
     setIsLoading(true);
     try {
       const teamId = currentTeam?.id;
       const [invoicesData, methodsData, summaryData] = await Promise.all([
         apiClient.getInvoice(teamId),
-        apiClient.getPaymentMethods(teamId || " "),
+        apiClient.getPaymentMethods(teamId || ""),
         apiClient.getBillingSummary(),
       ]);
       setInvoices(invoicesData);
@@ -52,6 +47,10 @@ export const Billing: React.FC = () => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchBillingData();
+  }, [currentTeam]);
 
   const handlePayInvoice = async (invoiceId: string, method: string) => {
     try {
@@ -74,6 +73,7 @@ export const Billing: React.FC = () => {
       console.error("Failed to add payment method:", error);
     }
   };
+
   const handleRemovePaymentMethod = async (id: string) => {
     try {
       await apiClient.removePaymentMethod(id);
@@ -237,6 +237,7 @@ export const Billing: React.FC = () => {
           </button>
         ))}
       </div>
+
       {/* Tab Content */}
       {activeTab === "invoices" && (
         <div className="bg-white dark:bg-gray-900 rounded-lg border border-border p-6">
@@ -279,6 +280,7 @@ export const Billing: React.FC = () => {
           />
         </div>
       )}
+
       {activeTab === "usage" && (
         <div className="bg-white dark:bg-gray-900 rounded-lg border border-border p-6">
           <UsageReport teamId={currentTeam?.id || ""} />

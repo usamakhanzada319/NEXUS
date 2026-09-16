@@ -1,15 +1,7 @@
 // webhook config => for  setup External webhook
 
 import React, { useState, useEffect } from "react";
-import {
-  Webhook,
-  Plus,
-  Trash2,
-  X,
-  Link2,
-  Zap,
-  XCircle,
-} from "lucide-react";
+import { Webhook, Plus, Trash2, X, Link2, Zap, XCircle } from "lucide-react";
 import { useNotification } from "../../context/NotificationContext";
 
 interface WebhookConfigItem {
@@ -41,7 +33,7 @@ export const WebhookConfig: React.FC = () => {
     if (saved) {
       try {
         setWebhooks(JSON.parse(saved));
-      } catch (error) {
+      } catch {
         setWebhooks([]);
       }
     }
@@ -62,7 +54,7 @@ export const WebhookConfig: React.FC = () => {
 
     try {
       new URL(newUrl);
-    } catch (error) {
+    } catch {
       addNotification("Please enter a valid URL", "error");
       return;
     }

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { apiClient } from "../../api/client";
 import { useNotification } from "../../context/NotificationContext";
 import { PasswordPolicy as PasswordPolicyType } from "../../types";
-import { Lock, Save, } from "lucide-react";
+import { Lock, Save } from "lucide-react";
 
 export const PasswordPolicy: React.FC = () => {
   const { addNotification } = useNotification();
@@ -11,10 +11,7 @@ export const PasswordPolicy: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [editing, setEditing] = useState<PasswordPolicyType | null>(null);
 
-  useEffect(() => {
-    loadPolicy();
-  }, []);
-
+  // ✅ Circular reference fix — function useEffect se pehle
   const loadPolicy = async () => {
     setIsLoading(true);
     try {
@@ -27,6 +24,10 @@ export const PasswordPolicy: React.FC = () => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadPolicy();
+  }, []);
 
   const handleSave = async () => {
     if (!editing) return;
@@ -51,6 +52,7 @@ export const PasswordPolicy: React.FC = () => {
       [key]: value,
     });
   };
+
   const requirements = [
     {
       key: "minLength",
@@ -70,7 +72,6 @@ export const PasswordPolicy: React.FC = () => {
       type: "boolean",
     },
     { key: "requireNumber", label: "Require number", type: "boolean" },
-
     {
       key: "requireSpecialChar",
       label: "Require special character",
@@ -99,6 +100,7 @@ export const PasswordPolicy: React.FC = () => {
       </div>
     );
   }
+
   if (!editing || !policy) {
     return (
       <div className="text-center py-8 text-red-500">
@@ -148,7 +150,11 @@ export const PasswordPolicy: React.FC = () => {
                     !editing[req.key as keyof PasswordPolicyType],
                   )
                 }
-                className={`px-3 py-1 text-sm rounded-lg transition-colors ${editing[req.key as keyof PasswordPolicyType] ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"}`}
+                className={`px-3 py-1 text-sm rounded-lg transition-colors ${
+                  editing[req.key as keyof PasswordPolicyType]
+                    ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                    : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                }`}
               >
                 {editing[req.key as keyof PasswordPolicyType]
                   ? "Enabled"
@@ -172,12 +178,13 @@ export const PasswordPolicy: React.FC = () => {
           </div>
         ))}
       </div>
+
       <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
         <h4 className="font-medium text-blue-700 dark:text-blue-400">
           Password Requirements
         </h4>
         <ul className="mt-2 space-y-1 text-sm text-blue-600 dark:text-blue-300">
-          <li> Minimum {policy.minLength} characters</li>
+          <li>Minimum {policy.minLength} characters</li>
           {policy.requireUppercase && <li>At least 1 uppercase letter</li>}
           {policy.requireLowercase && <li>At least 1 lowercase letter</li>}
           {policy.requireNumber && <li>At least 1 number</li>}

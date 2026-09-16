@@ -8,17 +8,12 @@ import { Skeleton } from "../components/common/Skeleton";
 
 export const Teams: React.FC = () => {
   const { isAdmin, user } = useAuth();
-
   const [teams, setTeams] = useState<Team[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
 
-  useEffect(() => {
-    fetchTeams();
-  }, []);
-
+  // Circular reference fix — function useEffect se pehle
   const fetchTeams = async () => {
     setIsLoading(true);
     try {
@@ -31,6 +26,10 @@ export const Teams: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    fetchTeams();
+  }, []);
+
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this team?")) return;
     try {
@@ -42,14 +41,17 @@ export const Teams: React.FC = () => {
   };
 
   if (isLoading) {
-    <div className="space-y-6">
-      <div>
-        <Skeleton variant="text" width="20%" height={28} ClassName="mb-2" />
-        <Skeleton variant="text" width="40%" height={16} />
+    return (
+      <div className="space-y-6">
+        <div>
+          <Skeleton variant="text" width="20%" height={28} className="mb-2" />
+          <Skeleton variant="text" width="40%" height={16} />
+        </div>
+        <TableSkeleton rows={5} cols={4} />
       </div>
-      <TableSkeleton rows={5} cols={4} />
-    </div>;
+    );
   }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -69,6 +71,7 @@ export const Teams: React.FC = () => {
           </button>
         )}
       </div>
+
       {/* Team List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {teams.map((team) => (
@@ -76,7 +79,7 @@ export const Teams: React.FC = () => {
             key={team.id}
             className="bg-white dark:bg-gray-900 rounded-lg border border-border p-6 card-hover"
           >
-            <div className="flex items-start justify-between ">
+            <div className="flex items-start justify-between">
               <div>
                 <h3 className="font-semibold">{team.name}</h3>
                 <p className="text-sm text-muted-foreground mt-1">
@@ -86,13 +89,14 @@ export const Teams: React.FC = () => {
               <span
                 className={`px-2 py-1 text-xs rounded-full ${
                   team.status === "active"
-                    ? `bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400`
+                    ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
                     : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400"
                 }`}
               >
                 {team.status}
               </span>
             </div>
+
             <div className="flex items-center gap-4 mt-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Users className="h-4 w-4" />
@@ -100,6 +104,7 @@ export const Teams: React.FC = () => {
               </div>
               <span>{new Date(team.createdAt).toLocaleDateString()}</span>
             </div>
+
             {isAdmin && (
               <div className="flex items-center gap-2 mt-4 pt-4 border-t border-border">
                 <button
@@ -115,7 +120,6 @@ export const Teams: React.FC = () => {
                   onClick={() => handleDelete(team.id)}
                   className="p-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors dark:text-red-400 dark:hover:bg-red-900/20"
                 >
-                  {" "}
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
@@ -123,6 +127,7 @@ export const Teams: React.FC = () => {
           </div>
         ))}
       </div>
+
       {/* Add/Edit Form Modal */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
@@ -170,7 +175,6 @@ export const Teams: React.FC = () => {
                 />
               </div>
               <div>
-                {" "}
                 <label className="block text-sm font-medium mb-1">
                   Description
                 </label>
@@ -182,7 +186,6 @@ export const Teams: React.FC = () => {
                   className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
-
               <div className="flex items-center gap-3 pt-2">
                 <button
                   type="submit"

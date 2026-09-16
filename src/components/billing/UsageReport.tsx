@@ -11,10 +11,6 @@ export const UsageReport: React.FC<UsageReportProps> = ({ teamId }) => {
   const [report, setReport] = useState<UsageReportType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    loadReport();
-  }, [teamId]);
-
   const loadReport = async () => {
     setIsLoading(true);
     try {
@@ -33,6 +29,10 @@ export const UsageReport: React.FC<UsageReportProps> = ({ teamId }) => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadReport();
+  }, [teamId]);
 
   const formatCurrency = (amount: number) => `$${amount.toFixed(2)}`;
 
@@ -55,14 +55,13 @@ export const UsageReport: React.FC<UsageReportProps> = ({ teamId }) => {
 
   return (
     <div className="space-y-6">
-      {/* header */}
-
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <BarChart3 className="h-5 w-5 text-primary-500" />
           <span className="font-medium">Usage Report</span>
           <span className="text-sm text-muted-foreground">
-            {new Date(report.periodStart).toLocaleDateString()} -
+            {new Date(report.periodStart).toLocaleDateString()} -{" "}
             {new Date(report.periodEnd).toLocaleDateString()}
           </span>
         </div>
@@ -97,9 +96,9 @@ export const UsageReport: React.FC<UsageReportProps> = ({ teamId }) => {
 
       {/* By Provider */}
       <div>
-        <h3 className="text-sm font-medium mb-2 ">By Provider</h3>
+        <h3 className="text-sm font-medium mb-2">By Provider</h3>
         <div className="space-y-2">
-          {report?.byProvider.map((provider) => (
+          {report.byProvider.map((provider) => (
             <div
               key={provider.providerId}
               className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg"
@@ -107,7 +106,7 @@ export const UsageReport: React.FC<UsageReportProps> = ({ teamId }) => {
               <div className="flex-1">
                 <p className="font-medium">{provider.providerName}</p>
                 <p className="text-sm text-muted-foreground">
-                  {provider.calls} calls . {provider.tokens.toLocaleString()}
+                  {provider.calls} calls · {provider.tokens.toLocaleString()}{" "}
                   tokens
                 </p>
               </div>
@@ -121,11 +120,12 @@ export const UsageReport: React.FC<UsageReportProps> = ({ teamId }) => {
           ))}
         </div>
       </div>
-      {/* By Modle */}
+
+      {/* By Model */}
       <div>
         <h3 className="text-sm font-medium mb-2">By Model</h3>
         <div className="space-y-2">
-          {report?.byModel.map((model) => (
+          {report.byModel.map((model) => (
             <div
               key={model.model}
               className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg"
@@ -133,7 +133,7 @@ export const UsageReport: React.FC<UsageReportProps> = ({ teamId }) => {
               <div className="flex-1">
                 <p className="font-medium">{model.model}</p>
                 <p className="text-sm text-muted-foreground">
-                  {model.calls} . {model.tokens.toLocaleString()} tokens
+                  {model.calls} · {model.tokens.toLocaleString()} tokens
                 </p>
               </div>
               <div className="text-right">
@@ -146,11 +146,12 @@ export const UsageReport: React.FC<UsageReportProps> = ({ teamId }) => {
           ))}
         </div>
       </div>
+
       {/* Daily Breakdown */}
       <div>
-        <h3 className="text-sm font-medium mb-2 ">Daily Breakdown</h3>
+        <h3 className="text-sm font-medium mb-2">Daily Breakdown</h3>
         <div className="overflow-auto">
-          <table className=" w-full text-sm">
+          <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left">
                 <th className="pb-1 font-medium text-muted-foreground">Date</th>
@@ -164,7 +165,7 @@ export const UsageReport: React.FC<UsageReportProps> = ({ teamId }) => {
               </tr>
             </thead>
             <tbody>
-              {report?.byDay.map((day, index) => (
+              {report.byDay.map((day, index) => (
                 <tr key={index} className="border-b border-border/50">
                   <td className="py-1.5">
                     {new Date(day.date).toLocaleDateString()}

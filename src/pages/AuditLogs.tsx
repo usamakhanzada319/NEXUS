@@ -28,7 +28,7 @@ export const AuditLogs: React.FC = () => {
   const itemsPerPage = 20;
 
   useEffect(() => {
-    const fetchLog = async () => {
+    const loadData = async () => {
       setIsLoading(true);
       try {
         const data = await apiClient.getAuditLogs();
@@ -40,17 +40,32 @@ export const AuditLogs: React.FC = () => {
         setIsLoading(false);
       }
     };
-    fetchLog();
+    loadData();
   }, []);
+  // useEffect(() => {
+  //   const fetchLog = async () => {
+  //     setIsLoading(true);
+  //     try {
+  //       const data = await apiClient.getAuditLogs();
+  //       setLogs(data);
+  //       setFilteredLog(data);
+  //     } catch (error) {
+  //       console.error("Failed to fetch audit logs:", error);
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
+  //   fetchLog();
+  // }, []);
 
   // Filter logs
   useEffect(() => {
     let result = logs;
 
-    // Search filter
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      result.filter(
+      result = result.filter(
+        // ← filter assign karein
         (log) =>
           log.userName.toLowerCase().includes(term) ||
           log.userEmail.toLowerCase().includes(term) ||
@@ -58,8 +73,6 @@ export const AuditLogs: React.FC = () => {
           JSON.stringify(log.details).toLowerCase().includes(term),
       );
     }
-
-    // Action filter
 
     if (filterAction !== "all") {
       result = result.filter((log) => log.action === filterAction);

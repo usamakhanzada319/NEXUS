@@ -11,10 +11,6 @@ export const Providers: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingProvider, setEditingProvider] = useState<Provider | null>(null);
 
-  useEffect(() => {
-    fetchProviders();
-  }, []);
-
   const fetchProviders = async () => {
     setIsLoading(true);
     try {
@@ -26,6 +22,10 @@ export const Providers: React.FC = () => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchProviders();
+  }, []);
 
   const handleToggle = async (id: string) => {
     try {
@@ -45,6 +45,7 @@ export const Providers: React.FC = () => {
       console.log("Failed to Delete provider:", error);
     }
   };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">Loading....</div>
@@ -53,8 +54,7 @@ export const Providers: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* header */}
-
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <div className="text-2xl font-bold">Providers</div>
@@ -72,6 +72,7 @@ export const Providers: React.FC = () => {
           </button>
         )}
       </div>
+
       {/* Provider List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {providers.map((provider) => (
@@ -82,7 +83,6 @@ export const Providers: React.FC = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span className="text-xl">{provider.icon || "🤖"}</span>
-
                 <div>
                   <h3 className="font-semibold">{provider.name}</h3>
                   <p className="text-sm text-muted-foreground">
@@ -103,11 +103,12 @@ export const Providers: React.FC = () => {
 
             <div className="mt-4 text-sm text-muted-foreground">
               <p>
-                Pricing:${provider.pricing.input}/1M . $
+                Pricing: ${provider.pricing.input}/1M · $
                 {provider.pricing.output}/1M
               </p>
               <p className="mt-1">Models: {provider.models.join(", ")}</p>
             </div>
+
             <div className="flex items-center gap-2 mt-4 pt-4 border-t border-border">
               {isAdmin && (
                 <>
@@ -152,7 +153,6 @@ export const Providers: React.FC = () => {
       </div>
 
       {/* Add/Edit Form Modal */}
-
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl w-full max-w-md p-6">

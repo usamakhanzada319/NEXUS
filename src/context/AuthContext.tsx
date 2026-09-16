@@ -73,7 +73,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         return { success: true, redirectTo };
       }
       return { success: false };
-    } catch (error) {
+    } catch {
       return { success: false };
     } finally {
       setIsLoading(false);

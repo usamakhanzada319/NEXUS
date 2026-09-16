@@ -23,8 +23,24 @@ import {
   PaymentMethod,
   UsageReport,
   BillingSummary,
-  Invoice
+  Invoice,
 } from "../types";
+
+import { encryptApiKey, decryptApiKey } from "../utils/encryption";
+
+// LOCAL STORAGE HELPERS
+
+const loadFromStorage = <T>(key: string, defaultData: T): T => {
+  try {
+    const stored = localStorage.getItem(key);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (error) {
+    console.error(`Error loading ${key}:`, error);
+  }
+  return defaultData;
+};
 
 import {
   mockUsers,
@@ -45,25 +61,8 @@ import {
   mockInvoices,
   mockPaymentMethods,
   mockUsageReports,
-  mockBillingSummary
+  mockBillingSummary,
 } from "./mockData";
-
-import { encryptApiKey, decryptApiKey } from '../utils/encryption';
-
-
-// LOCAL STORAGE HELPERS
-
-const loadFromStorage = <T>(key: string, defaultData: T): T => {
-  try {
-    const stored = localStorage.getItem(key);
-    if (stored) {
-      return JSON.parse(stored);
-    }
-  } catch (error) {
-    console.error(`Error loading ${key}:`, error);
-  }
-  return defaultData;
-};
 
 const saveToStorage = <T>(key: string, data: T): void => {
   try {
@@ -99,10 +98,10 @@ const initMockData = () => {
   }
 
   if (!localStorage.getItem("nexus_auditLogs")) {
-    saveToStorage("nexus_auditLogs", mockAuditLogs)
+    saveToStorage("nexus_auditLogs", mockAuditLogs);
   }
   if (!localStorage.getItem("nexus_apiCallLogs")) {
-    saveToStorage("nexus_apiCallLogs", mockAPICallLogs)
+    saveToStorage("nexus_apiCallLogs", mockAPICallLogs);
   }
 
   if (!localStorage.getItem("nexus_providerHealth")) {
@@ -117,51 +116,44 @@ const initMockData = () => {
   }
 
   if (!localStorage.getItem("nexus_loginHistory")) {
-    saveToStorage("nexus_loginHistory", mockLoginHistory)
+    saveToStorage("nexus_loginHistory", mockLoginHistory);
   }
 
   if (!localStorage.getItem("nexus_sessions")) {
     saveToStorage("nexus_sessions", mockSessions);
-
   }
   if (!localStorage.getItem("nexus_passwordPolicy")) {
     saveToStorage("nexus_passwordPolicy", mockPasswordPolicy);
   }
 
   if (!localStorage.getItem("nexus_invoices")) {
-    saveToStorage("nexus_invoices", mockInvoices)
+    saveToStorage("nexus_invoices", mockInvoices);
   }
 
   if (!localStorage.getItem("nexus_paymentMethods")) {
-    saveToStorage("nexus_paymentMethods", mockPaymentMethods)
+    saveToStorage("nexus_paymentMethods", mockPaymentMethods);
   }
 
   if (!localStorage.getItem("nexus_usageReports")) {
-    saveToStorage("nexus_usageReports", mockUsageReports)
+    saveToStorage("nexus_usageReports", mockUsageReports);
   }
 
   if (!localStorage.getItem("nexus_billingSummary")) {
-    saveToStorage("nexus_billingSummary", mockBillingSummary)
+    saveToStorage("nexus_billingSummary", mockBillingSummary);
   }
 };
 
 initMockData();
 
-
 // GENERATE ID
-
 
 const generateId = () =>
   Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
 
-
 // MOCK API
 
-
 export const mockApi = {
-
   // USERS
-
 
   getUsers: (): User[] => {
     try {
@@ -235,9 +227,7 @@ export const mockApi = {
     }
   },
 
-
   // TEAMS
-
 
   getTeams: (): Team[] => {
     try {
@@ -384,18 +374,22 @@ export const mockApi = {
 
   // TEAM-PROVIDERS
 
-
   getTeamProviders: (teamId: string): TeamProvider[] => {
     try {
-      const all = loadFromStorage<TeamProvider[]>("nexus_teamProviders", mockTeamProviders);
-      const teamProviders = all.filter((tp: TeamProvider) => tp.teamId === teamId);
+      const all = loadFromStorage<TeamProvider[]>(
+        "nexus_teamProviders",
+        mockTeamProviders,
+      );
+      const teamProviders = all.filter(
+        (tp: TeamProvider) => tp.teamId === teamId,
+      );
 
       //Decrypt API keys before returning
       return teamProviders.map((tp) => {
-        const result = { ...tp }
+        const result = { ...tp };
         if (tp.apiKeyEncrypted) {
           try {
-            result.apiKeyEncrypted = decryptApiKey(tp.apiKeyEncrypted)
+            result.apiKeyEncrypted = decryptApiKey(tp.apiKeyEncrypted);
           } catch {
             return tp;
           }
@@ -410,7 +404,10 @@ export const mockApi = {
 
   getProviderTeams: (providerId: string): TeamProvider[] => {
     try {
-      const all = loadFromStorage<TeamProvider[]>("nexus_teamProviders", mockTeamProviders);
+      const all = loadFromStorage<TeamProvider[]>(
+        "nexus_teamProviders",
+        mockTeamProviders,
+      );
       return all.filter((tp: TeamProvider) => tp.providerId === providerId);
     } catch (error) {
       console.error(`Error fetching provider teams for ${providerId}:`, error);
@@ -425,9 +422,13 @@ export const mockApi = {
     config: Partial<TeamProvider>,
   ): TeamProvider => {
     try {
-      const all = loadFromStorage<TeamProvider[]>("nexus_teamProviders", mockTeamProviders);
+      const all = loadFromStorage<TeamProvider[]>(
+        "nexus_teamProviders",
+        mockTeamProviders,
+      );
       const existing = all.find(
-        (tp: TeamProvider) => tp.teamId === teamId && tp.providerId === providerId,
+        (tp: TeamProvider) =>
+          tp.teamId === teamId && tp.providerId === providerId,
       );
 
       // Encrypt API key if provided
@@ -453,7 +454,9 @@ export const mockApi = {
         enabled: config.enabled ?? true,
         spendLimit: config.spendLimit ?? 0,
         modelsAssigned: config.modelsAssigned ?? [],
-        apiKeyEncrypted: config.apiKeyEncrypted ? encryptApiKey(config.apiKeyEncrypted) : undefined,
+        apiKeyEncrypted: config.apiKeyEncrypted
+          ? encryptApiKey(config.apiKeyEncrypted)
+          : undefined,
         assignedAt: new Date().toISOString(),
       };
       all.push(newAssignment);
@@ -473,9 +476,13 @@ export const mockApi = {
 
   removeProviderFromTeam: (teamId: string, providerId: string): boolean => {
     try {
-      let all = loadFromStorage<TeamProvider[]>("nexus_teamProviders", mockTeamProviders);
+      let all = loadFromStorage<TeamProvider[]>(
+        "nexus_teamProviders",
+        mockTeamProviders,
+      );
       all = all.filter(
-        (tp: TeamProvider) => !(tp.teamId === teamId && tp.providerId === providerId),
+        (tp: TeamProvider) =>
+          !(tp.teamId === teamId && tp.providerId === providerId),
       );
       saveToStorage("nexus_teamProviders", all);
       return true;
@@ -490,9 +497,13 @@ export const mockApi = {
     providerId: string,
   ): TeamProvider | undefined => {
     try {
-      const all = loadFromStorage<TeamProvider[]>("nexus_teamProviders", mockTeamProviders);
+      const all = loadFromStorage<TeamProvider[]>(
+        "nexus_teamProviders",
+        mockTeamProviders,
+      );
       const index = all.findIndex(
-        (tp: TeamProvider) => tp.teamId === teamId && tp.providerId === providerId,
+        (tp: TeamProvider) =>
+          tp.teamId === teamId && tp.providerId === providerId,
       );
       if (index === -1) return undefined;
       all[index].enabled = !all[index].enabled;
@@ -511,9 +522,13 @@ export const mockApi = {
     config: Partial<TeamProvider>,
   ): TeamProvider | undefined => {
     try {
-      const all = loadFromStorage<TeamProvider[]>("nexus_teamProviders", mockTeamProviders);
+      const all = loadFromStorage<TeamProvider[]>(
+        "nexus_teamProviders",
+        mockTeamProviders,
+      );
       const index = all.findIndex(
-        (tp: TeamProvider) => tp.teamId === teamId && tp.providerId === providerId,
+        (tp: TeamProvider) =>
+          tp.teamId === teamId && tp.providerId === providerId,
       );
       if (index === -1) return undefined;
 
@@ -537,7 +552,6 @@ export const mockApi = {
       return undefined;
     }
   },
-
 
   // SPEND
 
@@ -609,16 +623,13 @@ export const mockApi = {
     }
   },
 
-
-
   // AUDIT LOG METHODS
 
   // Get all audit logs
 
   getAuditLogs: (): AuditLog[] => {
     try {
-      return loadFromStorage<AuditLog[]>("nexus_auditLogs", mockAuditLogs)
-
+      return loadFromStorage<AuditLog[]>("nexus_auditLogs", mockAuditLogs);
     } catch (error) {
       console.error("Error fetching audit logs:", error);
       return mockAuditLogs;
@@ -648,9 +659,8 @@ export const mockApi = {
     }
   },
 
-
   // Add audit log
-  addAuditLog: (log: Omit<AuditLog, 'id' | 'createdAt'>): AuditLog => {
+  addAuditLog: (log: Omit<AuditLog, "id" | "createdAt">): AuditLog => {
     try {
       const all = mockApi.getAuditLogs();
       const newLog: AuditLog = {
@@ -667,7 +677,6 @@ export const mockApi = {
     }
   },
 
-
   getRecentAuditLogs: (limit: number = 5): AuditLog[] => {
     try {
       const all = mockApi.getAuditLogs();
@@ -682,11 +691,13 @@ export const mockApi = {
 
   getAPICallLogs: (): APICallLog[] => {
     try {
-      return loadFromStorage<APICallLog[]>("nexus_apiCallLogs", mockAPICallLogs)
+      return loadFromStorage<APICallLog[]>(
+        "nexus_apiCallLogs",
+        mockAPICallLogs,
+      );
     } catch (error) {
       console.error("Error fetching API call logs:", error);
       return mockAPICallLogs;
-
     }
   },
 
@@ -695,8 +706,7 @@ export const mockApi = {
   getAPICallLogsByTeam: (teamId: string): APICallLog[] => {
     try {
       const all = mockApi.getAPICallLogs();
-      return all.filter((log) => log.teamId === teamId)
-
+      return all.filter((log) => log.teamId === teamId);
     } catch (error) {
       console.error(`Error fetching API call logs for team ${teamId}:`, error);
       return [];
@@ -707,9 +717,12 @@ export const mockApi = {
   getAPICallLogsByProvider: (providerId: string): APICallLog[] => {
     try {
       const all = mockApi.getAPICallLogs();
-      return all.filter((log) => log.providerId === providerId)
+      return all.filter((log) => log.providerId === providerId);
     } catch (error) {
-      console.error(`Error fetching API call logs for provider ${providerId}:`, error);
+      console.error(
+        `Error fetching API call logs for provider ${providerId}:`,
+        error,
+      );
       return [];
     }
   },
@@ -724,8 +737,8 @@ export const mockApi = {
         createdAt: new Date().toISOString(),
       };
 
-      all.unshift(newLog)
-      saveToStorage("nexus_apiCallLogs", all)
+      all.unshift(newLog);
+      saveToStorage("nexus_apiCallLogs", all);
       return newLog;
     } catch (error) {
       console.error("Error adding API call log:", error);
@@ -736,21 +749,28 @@ export const mockApi = {
   // Get analytics stats
   getAnalyticsStats: (): AnalyticsStats => {
     try {
-
       const logs = mockApi.getAPICallLogs();
       const totalCalls = logs.length;
-      const totalTokens = logs.reduce((sum, log) => sum + log.totalTokens, 0)
+      const totalTokens = logs.reduce((sum, log) => sum + log.totalTokens, 0);
       const totalCost = logs.reduce((sum, log) => sum + log.cost, 0);
-      const avgResponseTime = logs.length > 0 ? logs.reduce((sum, log) => sum + log.responseTime, 0) / logs.length : 0
-      const successRate = logs.length > 0 ? (logs.filter((log) => log.status === "success").length / logs.length) * 100 : 0;
+      const avgResponseTime =
+        logs.length > 0
+          ? logs.reduce((sum, log) => sum + log.responseTime, 0) / logs.length
+          : 0;
+      const successRate =
+        logs.length > 0
+          ? (logs.filter((log) => log.status === "success").length /
+              logs.length) *
+            100
+          : 0;
 
       return {
         totalCalls,
         totalTokens,
         totalCost,
         avgResponseTime,
-        successRate
-      }
+        successRate,
+      };
     } catch (error) {
       console.error("Error fetching analytics stats:", error);
 
@@ -760,9 +780,8 @@ export const mockApi = {
         totalCost: 0,
         avgResponseTime: 0,
         successRate: 0,
-      }
+      };
     }
-
   },
 
   // Get provider analytics
@@ -794,11 +813,17 @@ export const mockApi = {
 
       // Calculate averages
       providerMap.forEach((data) => {
-        data.avgResponseTime = data.calls > 0 ? data.avgResponseTime / data.calls : 0;
-        const providerLogs = logs.filter((log) => log.providerId === data.providerId);
-        data.successRate = providerLogs.length > 0
-          ? (providerLogs.filter((log) => log.status === 'success').length / providerLogs.length) * 100
-          : 0;
+        data.avgResponseTime =
+          data.calls > 0 ? data.avgResponseTime / data.calls : 0;
+        const providerLogs = logs.filter(
+          (log) => log.providerId === data.providerId,
+        );
+        data.successRate =
+          providerLogs.length > 0
+            ? (providerLogs.filter((log) => log.status === "success").length /
+                providerLogs.length) *
+              100
+            : 0;
       });
 
       return Array.from(providerMap.values());
@@ -812,8 +837,7 @@ export const mockApi = {
 
   getModelAnalytics: (): ModelAnalytics[] => {
     try {
-
-      const logs = mockApi.getAPICallLogs()
+      const logs = mockApi.getAPICallLogs();
       const modelMap = new Map<string, ModelAnalytics>();
       logs.forEach((log) => {
         if (!modelMap.has(log.model)) {
@@ -823,22 +847,22 @@ export const mockApi = {
             totalTokens: 0,
             totalCost: 0,
             avgResponseTime: 0,
-          })
+          });
         }
 
         const data = modelMap.get(log.model)!;
         data.calls += 1;
         data.totalTokens += log.totalTokens;
-        data.totalCost += log.cost
-        data.avgResponseTime += log.responseTime
+        data.totalCost += log.cost;
+        data.avgResponseTime += log.responseTime;
       });
       // Calculate averages
 
       modelMap.forEach((data) => {
-        data.avgResponseTime = data.calls > 0 ? data.avgResponseTime / data.calls : 0
-      })
+        data.avgResponseTime =
+          data.calls > 0 ? data.avgResponseTime / data.calls : 0;
+      });
       return Array.from(modelMap.values());
-
     } catch (error) {
       console.error("Error fetching model analytics:", error);
       return [];
@@ -847,14 +871,13 @@ export const mockApi = {
 
   //Budget Method
 
-
   // Get all budgets
   getBudgets: (): TeamBudget[] => {
     try {
-      return loadFromStorage<TeamBudget[]>("nexus_budgets", mockBudgets)
+      return loadFromStorage<TeamBudget[]>("nexus_budgets", mockBudgets);
     } catch (error) {
       console.error("Error fetching budgets:", error);
-      return mockBudgets
+      return mockBudgets;
     }
   },
 
@@ -863,31 +886,33 @@ export const mockApi = {
   getBudgetByTeam: (teamId: string): TeamBudget | undefined => {
     try {
       const budgets = mockApi.getBudgets();
-      return budgets.find((b) => b.teamId === teamId)
-
+      return budgets.find((b) => b.teamId === teamId);
     } catch (error) {
       console.error(`Error fetching budget for team ${teamId}:`, error);
       return undefined;
-
     }
   },
   // Update budget
 
-  updateBudget: (teamId: string, update: Partial<TeamBudget>): TeamBudget | undefined => {
+  updateBudget: (
+    teamId: string,
+    update: Partial<TeamBudget>,
+  ): TeamBudget | undefined => {
     try {
       const budgets = mockApi.getBudgets();
       const index = budgets.findIndex((b) => b.teamId === teamId);
-      if (index === -1) return undefined
+      if (index === -1) return undefined;
       budgets[index] = {
         ...budgets[index],
         ...update,
-        lastUpdated: new Date().toISOString()
-      }
+        lastUpdated: new Date().toISOString(),
+      };
       saveToStorage("nexus_budgets", budgets);
 
       // Check if soft/hard limit reached
       const budget = budgets[index];
-      const spendPercent = (budget.currentMonthSpend / budget.monthlyLimit) * 100
+      const spendPercent =
+        (budget.currentMonthSpend / budget.monthlyLimit) * 100;
 
       if (spendPercent >= budget.hardLimitPercent) {
         budget.isHardLimitReached = true;
@@ -901,7 +926,6 @@ export const mockApi = {
           type: "hard",
           message: `${budget.teamName} has reached 100% of monthly budget! API calls blocked.`,
           isResolved: false,
-
         });
       } else if (spendPercent >= budget.softLimitPercent) {
         budget.isSoftLimitReached = true;
@@ -910,7 +934,7 @@ export const mockApi = {
         mockApi.addBudgetAlert({
           teamId: budget.teamId,
           teamName: budget.teamName,
-          type: 'soft',
+          type: "soft",
           message: `${budget.teamName} has reached ${Math.round(spendPercent)}% of monthly budget (${budget.currentMonthSpend} / ${budget.monthlyLimit})`,
           isResolved: false,
         });
@@ -919,36 +943,27 @@ export const mockApi = {
         budget.isHardLimitReached = false;
       }
       saveToStorage("nexus_budgets", budgets);
-      return budgets[index]
-
+      return budgets[index];
     } catch (error) {
-
       console.error(`Error updating budget for team ${teamId}:`, error);
       return undefined;
-
     }
-
-
   },
 
   // Reset monthly budget (called on 1st of month)
 
   resetMonthlyBudgets: (): TeamBudget[] => {
-
     try {
-
-      const budgets = mockApi.getBudgets()
+      const budgets = mockApi.getBudgets();
       budgets.forEach((budget) => {
         budget.currentMonthSpend = 0;
         budget.currentDaySpend = 0;
-        budget.isSoftLimitReached = false
-        budget.isHardLimitReached = false
+        budget.isSoftLimitReached = false;
+        budget.isHardLimitReached = false;
         budget.lastUpdated = new Date().toISOString();
-
-      })
+      });
       saveToStorage("nexus_budgets", budgets);
       return budgets;
-
     } catch (error) {
       console.error("Error resetting budgets:", error);
       return [];
@@ -958,10 +973,11 @@ export const mockApi = {
   // Budget Alert Method
 
   getBudgetAlerts: (): BudgetAlert[] => {
-
     try {
-      return loadFromStorage<BudgetAlert[]>("nexus_budgetAlerts", mockBudgetAlerts)
-
+      return loadFromStorage<BudgetAlert[]>(
+        "nexus_budgetAlerts",
+        mockBudgetAlerts,
+      );
     } catch (error) {
       console.error("Error fetching budget alerts:", error);
       return mockBudgetAlerts;
@@ -971,27 +987,26 @@ export const mockApi = {
   // Get unresolved budget alerts
 
   getUnresolvedBudgetAlerts: (): BudgetAlert[] => {
-
     try {
       const alerts = mockApi.getBudgetAlerts();
-      return alerts.filter((a) => !a.isResolved)
-
+      return alerts.filter((a) => !a.isResolved);
     } catch (error) {
       console.error("Error fetching unresolved budget alerts:", error);
       return [];
-
     }
   },
 
   // Add budget alert
-  addBudgetAlert: (alert: Omit<BudgetAlert, "id" | "triggeredAt">): BudgetAlert => {
+  addBudgetAlert: (
+    alert: Omit<BudgetAlert, "id" | "triggeredAt">,
+  ): BudgetAlert => {
     try {
       const alerts = mockApi.getBudgetAlerts();
       const newAlert = {
         ...alert,
         id: generateId(),
         triggeredAt: new Date().toISOString(),
-      }
+      };
       alerts.unshift(newAlert);
       saveToStorage("nexus_budgetAlerts", alerts);
       return newAlert;
@@ -999,7 +1014,6 @@ export const mockApi = {
       console.error("Error adding budget alert:", error);
       throw new Error("Failed to add budget alert");
     }
-
   },
 
   // Resolve budget alert
@@ -1007,31 +1021,28 @@ export const mockApi = {
   resolveBudgetAlert: (id: string): BudgetAlert | undefined => {
     try {
       const alerts = mockApi.getBudgetAlerts();
-      const index = alerts.findIndex((a) => a.id === id)
-      if (index === -1) return undefined
+      const index = alerts.findIndex((a) => a.id === id);
+      if (index === -1) return undefined;
       alerts[index].isResolved = true;
-      alerts[index].resolvedAt = new Date().toISOString()
+      alerts[index].resolvedAt = new Date().toISOString();
       saveToStorage("nexus_budgetAlerts", alerts);
       return alerts[index];
-
     } catch (error) {
       console.error(`Error resolving budget alert ${id}:`, error);
       return undefined;
-
     }
-
-
   },
-
 
   // Get all provider health
   getProviderHealth: (): ProviderHealth[] => {
     try {
-      return loadFromStorage<ProviderHealth[]>("nexus_providerHealth", mockProviderHealth);
+      return loadFromStorage<ProviderHealth[]>(
+        "nexus_providerHealth",
+        mockProviderHealth,
+      );
     } catch (error) {
       console.error("Error fetching provider health:", error);
       return mockProviderHealth;
-
     }
   },
 
@@ -1045,12 +1056,14 @@ export const mockApi = {
       console.error(`Error fetching health for provider ${providerId}:`, error);
       return undefined;
     }
-
   },
 
   // update Provider health
 
-  updateProviderHealth: (providerId: string, updates: Partial<ProviderHealth>): ProviderHealth | undefined => {
+  updateProviderHealth: (
+    providerId: string,
+    updates: Partial<ProviderHealth>,
+  ): ProviderHealth | undefined => {
     try {
       const health = mockApi.getProviderHealth();
       const index = health.findIndex((h) => h.providerId === providerId);
@@ -1058,11 +1071,10 @@ export const mockApi = {
       health[index] = {
         ...health[index],
         ...updates,
-        lastCheck: new Date().toISOString()
-      }
+        lastCheck: new Date().toISOString(),
+      };
       saveToStorage("nexus_providerHealth", health);
       return health[index];
-
     } catch (error) {
       console.error(`Error updating health for provider ${providerId}:`, error);
       return undefined;
@@ -1073,7 +1085,6 @@ export const mockApi = {
 
   runHealthCheck: (providerId: string): HealthCheckResult => {
     try {
-
       const success = Math.random() > 0.1;
       const responseTime = Math.floor(Math.random() * 1000) + 200;
       const result: HealthCheckResult = {
@@ -1082,11 +1093,10 @@ export const mockApi = {
         responseTime,
         success,
         checkedAt: new Date().toISOString(),
-
-      }
+      };
 
       if (!success) {
-        result.error = 'Health check failed';
+        result.error = "Health check failed";
       }
 
       // Update provider health
@@ -1098,44 +1108,51 @@ export const mockApi = {
         health[index].status = result.status;
 
         const currentSuccess = health[index].successRate;
-        health[index].successRate = success ? Math.min(currentSuccess + 1, 100) : Math.max(currentSuccess - 2, 0)
+        health[index].successRate = success
+          ? Math.min(currentSuccess + 1, 100)
+          : Math.max(currentSuccess - 2, 0);
         health[index].errorRate = 100 - health[index].successRate;
         if (!success) {
-          health[index].failoverCount = (health[index].failoverCount || 0) + 1
+          health[index].failoverCount = (health[index].failoverCount || 0) + 1;
           if (health[index].failoverCount >= 5) {
             health[index].isCircuitOpen = true;
-            health[index].status = 'unhealthy';
+            health[index].status = "unhealthy";
           }
         } else {
-          health[index].failoverCount = Math.max(0, (health[index].failoverCount || 0) - 1);
+          health[index].failoverCount = Math.max(
+            0,
+            (health[index].failoverCount || 0) - 1,
+          );
           if (health[index].failoverCount < 3) {
             health[index].isCircuitOpen = false;
           }
         }
         saveToStorage("nexus_providerHealth", health);
-
-
       }
       return result;
-
     } catch (error) {
-      console.error(`Error running health check for provider ${providerId}:`, error);
+      console.error(
+        `Error running health check for provider ${providerId}:`,
+        error,
+      );
       return {
         providerId,
-        status: 'unhealthy',
+        status: "unhealthy",
         responseTime: 0,
         success: false,
-        error: 'Health check failed',
+        error: "Health check failed",
         checkedAt: new Date().toISOString(),
       };
-
     }
   },
 
   // Get fallback configs
   getFallbackConfigs: (): ProviderFallbackConfig[] => {
     try {
-      return loadFromStorage<ProviderFallbackConfig[]>("nexus_fallbackConfigs", mockFallbackConfigs);
+      return loadFromStorage<ProviderFallbackConfig[]>(
+        "nexus_fallbackConfigs",
+        mockFallbackConfigs,
+      );
     } catch (error) {
       console.error("Error fetching fallback configs:", error);
       return mockFallbackConfigs;
@@ -1143,7 +1160,10 @@ export const mockApi = {
   },
 
   // Update fallback config
-  updateFallbackConfig: (providerId: string, config: Partial<ProviderFallbackConfig>): ProviderFallbackConfig | undefined => {
+  updateFallbackConfig: (
+    providerId: string,
+    config: Partial<ProviderFallbackConfig>,
+  ): ProviderFallbackConfig | undefined => {
     try {
       const configs = mockApi.getFallbackConfigs();
       const index = configs.findIndex((c) => c.providerId === providerId);
@@ -1152,11 +1172,13 @@ export const mockApi = {
       saveToStorage("nexus_fallbackConfigs", configs);
       return configs[index];
     } catch (error) {
-      console.error(`Error updating fallback config for provider ${providerId}:`, error);
+      console.error(
+        `Error updating fallback config for provider ${providerId}:`,
+        error,
+      );
       return undefined;
     }
   },
-
 
   // Get fallback provider for a provider
   getFallbackProvider: (providerId: string): string | undefined => {
@@ -1168,28 +1190,31 @@ export const mockApi = {
       }
       return undefined;
     } catch (error) {
-      console.error(`Error getting fallback provider for ${providerId}:`, error);
+      console.error(
+        `Error getting fallback provider for ${providerId}:`,
+        error,
+      );
       return undefined;
     }
-
-
   },
-
 
   // Generate TOTP secret
 
   generateTOTPSecret: (userId: string): MFASetupResponse => {
     try {
-
       // simulate TOTP Secret
       const secret = "ABCDEFGHIJKLMNOP".repeat(2);
-      const backupCodes = Array.from({ length: 10 }, () => Math.random().toString(36).substring(2, 8).toUpperCase());
-
+      const backupCodes = Array.from({ length: 10 }, () =>
+        Math.random().toString(36).substring(2, 8).toUpperCase(),
+      );
 
       // save MFA Config
 
-      const configs = loadFromStorage<MFAConfig[]>("nexus_mfaConfigs", mockMFAConfigs)
-      const existingIndex = configs.findIndex((c) => c.userId === userId)
+      const configs = loadFromStorage<MFAConfig[]>(
+        "nexus_mfaConfigs",
+        mockMFAConfigs,
+      );
+      const existingIndex = configs.findIndex((c) => c.userId === userId);
 
       const newConfig: MFAConfig = {
         userId,
@@ -1197,28 +1222,26 @@ export const mockApi = {
         secret,
         backupCodes,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-
-      }
+        updatedAt: new Date().toISOString(),
+      };
 
       if (existingIndex !== -1) {
         configs[existingIndex] = {
           ...configs[existingIndex],
-          ...newConfig
-        }
+          ...newConfig,
+        };
       } else {
-        configs.push(newConfig)
+        configs.push(newConfig);
       }
       saveToStorage("nexus_mfaConfigs", configs);
       return {
-        qrCode: `data:image/svg+xml,${encodeURIComponent('<svg>QR Code</svg>')}`,
+        qrCode: `data:image/svg+xml,${encodeURIComponent("<svg>QR Code</svg>")}`,
         secret,
         backupCodes,
-      }
+      };
     } catch (error) {
       console.error("Error generating TOTP secret:", error);
       throw new Error("Failed to generate TOTP secret");
-
     }
   },
 
@@ -1226,11 +1249,13 @@ export const mockApi = {
 
   verifyMFACode: (userId: string, code: string): boolean => {
     try {
-
-      const configs = loadFromStorage<MFAConfig[]>("nexus_mfaConfigs", mockMFAConfigs);
+      const configs = loadFromStorage<MFAConfig[]>(
+        "nexus_mfaConfigs",
+        mockMFAConfigs,
+      );
       const config = configs.find((c) => c.userId === userId);
       if (!config || !config.secret) {
-        return false
+        return false;
       }
       // Simulate TOTP verification
       const isValid = code.length === 6 && /^\d{6}$/.test(code);
@@ -1240,19 +1265,21 @@ export const mockApi = {
         config.updatedAt = new Date().toISOString();
         saveToStorage("nexus_mfaConfigs", configs);
       }
-      return isValid
+      return isValid;
     } catch (error) {
       console.error("Error verifying MFA code:", error);
       return false;
-
     }
   },
 
   // Disable MFA
   disableMFA: (userId: string): boolean => {
     try {
-      const configs = loadFromStorage<MFAConfig[]>("nexus_mfaConfigs", mockMFAConfigs);
-      const config = configs.find(c => c.userId === userId);
+      const configs = loadFromStorage<MFAConfig[]>(
+        "nexus_mfaConfigs",
+        mockMFAConfigs,
+      );
+      const config = configs.find((c) => c.userId === userId);
 
       if (!config) return false;
 
@@ -1261,152 +1288,164 @@ export const mockApi = {
       config.updatedAt = new Date().toISOString();
       saveToStorage("nexus_mfaConfigs", configs);
       return true;
-
     } catch (error) {
       console.error("Error disabling MFA:", error);
       return false;
-
     }
   },
 
   // Get MFA config
   getMFAConfig: (userId: string): MFAConfig | undefined => {
     try {
-      const configs = loadFromStorage<MFAConfig[]>("nexus_mfaConfigs", mockMFAConfigs);
-      return configs.find(c => c.userId === userId);
-
+      const configs = loadFromStorage<MFAConfig[]>(
+        "nexus_mfaConfigs",
+        mockMFAConfigs,
+      );
+      return configs.find((c) => c.userId === userId);
     } catch (error) {
       console.error("Error getting MFA config:", error);
       return undefined;
     }
-
   },
 
   // Regenerate backup codes
   regenerateBackupCodes: (userId: string): string[] => {
     try {
-      const configs = loadFromStorage<MFAConfig[]>("nexus_mfaConfigs", mockMFAConfigs);
-      const config = configs.find(c => c.userId === userId);
+      const configs = loadFromStorage<MFAConfig[]>(
+        "nexus_mfaConfigs",
+        mockMFAConfigs,
+      );
+      const config = configs.find((c) => c.userId === userId);
 
       if (!config) {
         throw new Error("MFA config not found");
       }
 
       const newCode = Array.from({ length: 10 }, () =>
-        Math.random().toString(36).substring(2, 8).toUpperCase()
+        Math.random().toString(36).substring(2, 8).toUpperCase(),
       );
       config.backupCodes = newCode;
-      config.updatedAt = new Date().toISOString()
+      config.updatedAt = new Date().toISOString();
       saveToStorage("nexus_mfaConfigs", configs);
-      return newCode
-
+      return newCode;
     } catch (error) {
-
       console.error("Error regenerating backup codes:", error);
       throw new Error("Failed to regenerate backup codes");
-
     }
   },
 
   // login History Methods
   getLoginHistory: (userId?: string): LoginHistory[] => {
-
     try {
-      const history = loadFromStorage<LoginHistory[]>("nexus_loginHistory", mockLoginHistory);
+      const history = loadFromStorage<LoginHistory[]>(
+        "nexus_loginHistory",
+        mockLoginHistory,
+      );
 
       if (userId) {
-        return history.filter((h) => h.userId === userId)
+        return history.filter((h) => h.userId === userId);
       }
-      return history
+      return history;
     } catch (error) {
       console.error("Error fetching login history:", error);
       return mockLoginHistory;
-
     }
   },
 
-  addLoginHistory: (entry: Omit<LoginHistory, "id" | "createdAt">): LoginHistory => {
+  addLoginHistory: (
+    entry: Omit<LoginHistory, "id" | "createdAt">,
+  ): LoginHistory => {
     try {
-      const history = loadFromStorage<LoginHistory[]>("nexus_loginHistory", mockLoginHistory);
+      const history = loadFromStorage<LoginHistory[]>(
+        "nexus_loginHistory",
+        mockLoginHistory,
+      );
       const newEntry: LoginHistory = {
         ...entry,
         id: generateId(),
         createdAt: new Date().toISOString(),
-      }
+      };
       history.unshift(newEntry);
       saveToStorage("nexus_loginHistory", history);
       return newEntry;
     } catch (error) {
       console.error("Error adding login history:", error);
       throw new Error("Failed to add login history");
-
     }
   },
   // Session Methods
 
   getSessions: (userId: string): Session[] => {
     try {
-      const sessions = loadFromStorage<Session[]>("nexus_sessions", mockSessions);
-      return sessions.filter(s => s.userId === userId);
+      const sessions = loadFromStorage<Session[]>(
+        "nexus_sessions",
+        mockSessions,
+      );
+      return sessions.filter((s) => s.userId === userId);
     } catch (error) {
       console.error("Error fetching sessions:", error);
       return [];
     }
-
   },
 
   addSesion: (session: Omit<Session, "createdAt">): Session => {
     try {
-
-      const sessions = loadFromStorage<Session[]>("nexus_sessions", mockSessions);
+      const sessions = loadFromStorage<Session[]>(
+        "nexus_sessions",
+        mockSessions,
+      );
       const newSession: Session = {
         ...session,
         createdAt: new Date().toISOString(),
-
-      }
+      };
       sessions.push(newSession);
       saveToStorage("nexus_sessions", sessions);
-      return newSession
-
+      return newSession;
     } catch (error) {
       console.error("Error adding session:", error);
       throw new Error("Failed to add session");
     }
-
   },
 
   revokeSession: (userId: string, deviceId: string): boolean => {
     try {
-      const sessions = loadFromStorage<Session[]>("nexus_sessions", mockSessions)
-      const filtered = sessions.filter((s) => !(s.userId === userId && s.deviceId === deviceId))
+      const sessions = loadFromStorage<Session[]>(
+        "nexus_sessions",
+        mockSessions,
+      );
+      const filtered = sessions.filter(
+        (s) => !(s.userId === userId && s.deviceId === deviceId),
+      );
       saveToStorage("nexus_sessions", filtered);
-      return true
+      return true;
     } catch (error) {
       console.error("Error revoking session:", error);
       return false;
-
     }
   },
 
   revokeAllSessions: (userId: string): boolean => {
     try {
-
-      const sessions = loadFromStorage<Session[]>("nexus_sessions", mockSessions);
-      const filtered = sessions.filter(s => s.userId !== userId);
-      saveToStorage("nexus_sessions", filtered)
-      return true
+      const sessions = loadFromStorage<Session[]>(
+        "nexus_sessions",
+        mockSessions,
+      );
+      const filtered = sessions.filter((s) => s.userId !== userId);
+      saveToStorage("nexus_sessions", filtered);
+      return true;
     } catch (error) {
       console.error("Error revoking all sessions:", error);
       return false;
-
     }
   },
 
   // Password Policy Method
   getPasswordPolicy: (): PasswordPolicy => {
     try {
-      return loadFromStorage<PasswordPolicy>("nexus_passwordPolicy", mockPasswordPolicy)
-
+      return loadFromStorage<PasswordPolicy>(
+        "nexus_passwordPolicy",
+        mockPasswordPolicy,
+      );
     } catch (error) {
       console.error("Error fetching password policy:", error);
       return mockPasswordPolicy;
@@ -1416,42 +1455,40 @@ export const mockApi = {
   updatePasswordPolicy: (policy: PasswordPolicy): PasswordPolicy => {
     try {
       saveToStorage("nexus_passwordPolicy", policy);
-      return policy
-
+      return policy;
     } catch (error) {
-
       console.error("Error updating password policy:", error);
       throw new Error("Failed to update password policy");
     }
-
   },
-
 
   //  Billing Methods
 
   getInvoices: (teamId?: string): Invoice[] => {
     try {
-      const invoices = loadFromStorage<Invoice[]>("nexus_invoices", mockInvoices)
+      const invoices = loadFromStorage<Invoice[]>(
+        "nexus_invoices",
+        mockInvoices,
+      );
       if (teamId) {
-        return invoices.filter(inv => inv.teamId === teamId)
+        return invoices.filter((inv) => inv.teamId === teamId);
       }
-      return invoices
-
+      return invoices;
     } catch (error) {
       console.error("Error fetching invoices:", error);
       return mockInvoices;
-
     }
-
   },
 
   // Get invoice by ID
 
   getInvoiceById: (invoiceId: string): Invoice | undefined => {
     try {
-      const invoices = loadFromStorage<Invoice[]>("nexus_invoices", mockInvoices);
-      return invoices.find(inv => inv.id === invoiceId);
-
+      const invoices = loadFromStorage<Invoice[]>(
+        "nexus_invoices",
+        mockInvoices,
+      );
+      return invoices.find((inv) => inv.id === invoiceId);
     } catch (error) {
       console.error(`Error fetching invoice ${invoiceId}:`, error);
       return undefined;
@@ -1461,29 +1498,37 @@ export const mockApi = {
   // Create invoice
   createInvoice: (invoice: Omit<Invoice, "id" | "createdAt">): Invoice => {
     try {
-      const invoices = loadFromStorage<Invoice[]>("nexus_invoices", mockInvoices);
+      const invoices = loadFromStorage<Invoice[]>(
+        "nexus_invoices",
+        mockInvoices,
+      );
       const newInvoice: Invoice = {
         ...invoice,
         id: generateId(),
-        createdAt: new Date().toISOString()
-      }
-      invoices.push(newInvoice)
+        createdAt: new Date().toISOString(),
+      };
+      invoices.push(newInvoice);
       saveToStorage("nexus_invoices", invoices);
       return newInvoice;
     } catch (error) {
       console.error("Error creating invoice:", error);
       throw new Error("Failed to create invoice");
-
     }
   },
 
   // Pay invoice
-  payInvoice: (invoiceId: string, _paymentMethod?: string): Invoice | undefined => {
+  payInvoice: (
+    invoiceId: string,
+    _paymentMethod?: string,
+  ): Invoice | undefined => {
     try {
-      const invoices = loadFromStorage<Invoice[]>("nexus_invoices", mockInvoices);
-      const index = invoices.findIndex(inv => inv.id === invoiceId);
+      const invoices = loadFromStorage<Invoice[]>(
+        "nexus_invoices",
+        mockInvoices,
+      );
+      const index = invoices.findIndex((inv) => inv.id === invoiceId);
       if (index === -1) return undefined;
-      invoices[index].status = 'paid';
+      invoices[index].status = "paid";
       invoices[index].paidAt = new Date().toISOString();
 
       saveToStorage("nexus_invoices", invoices);
@@ -1498,31 +1543,35 @@ export const mockApi = {
 
   getPaymentMethods: (teamId: string): PaymentMethod[] => {
     try {
-      const method = loadFromStorage<PaymentMethod[]>("nexus_paymentMethods", mockPaymentMethods);
+      const method = loadFromStorage<PaymentMethod[]>(
+        "nexus_paymentMethods",
+        mockPaymentMethods,
+      );
       return method.filter((pm) => pm.teamId === teamId);
     } catch (error) {
       console.error("Error fetching payment methods:", error);
-      return mockPaymentMethods.filter(pm => pm.teamId === teamId);
-
+      return mockPaymentMethods.filter((pm) => pm.teamId === teamId);
     }
   },
 
   // Add payment method
 
-
-  addPaymentMethod: (method: Omit<PaymentMethod, "id" | "createdAt">): PaymentMethod => {
-
+  addPaymentMethod: (
+    method: Omit<PaymentMethod, "id" | "createdAt">,
+  ): PaymentMethod => {
     try {
-      const methods = loadFromStorage<PaymentMethod[]>("nexus_paymentMethods", mockPaymentMethods);
+      const methods = loadFromStorage<PaymentMethod[]>(
+        "nexus_paymentMethods",
+        mockPaymentMethods,
+      );
       const newMethod: PaymentMethod = {
         ...method,
         id: generateId(),
         createdAt: new Date().toISOString(),
-
-      }
-      methods.push(newMethod)
-      saveToStorage("nexus_paymentMethods", methods)
-      return newMethod
+      };
+      methods.push(newMethod);
+      saveToStorage("nexus_paymentMethods", methods);
+      return newMethod;
     } catch (error) {
       console.error("Error adding payment method:", error);
       throw new Error("Failed to add payment method");
@@ -1533,10 +1582,13 @@ export const mockApi = {
 
   removePaymentMethod: (methodId: string): boolean => {
     try {
-      const methods = loadFromStorage<PaymentMethod[]>("nexus_paymentMethods", mockPaymentMethods);
+      const methods = loadFromStorage<PaymentMethod[]>(
+        "nexus_paymentMethods",
+        mockPaymentMethods,
+      );
       const filtered = methods.filter((pt) => pt.id !== methodId);
-      saveToStorage("nexus_paymentMethods", filtered)
-      return true
+      saveToStorage("nexus_paymentMethods", filtered);
+      return true;
     } catch (error) {
       console.error(`Error removing payment method ${methodId}:`, error);
       return false;
@@ -1546,49 +1598,60 @@ export const mockApi = {
   // Set default payment method
   setDefaultPaymentMethod: (teamId: string, methodId: string): boolean => {
     try {
-      const methods = loadFromStorage<PaymentMethod[]>("nexus_paymentMethods", mockPaymentMethods);
+      const methods = loadFromStorage<PaymentMethod[]>(
+        "nexus_paymentMethods",
+        mockPaymentMethods,
+      );
       methods.map((pm) => {
         if (pm.teamId === teamId) {
-          pm.isDefault = pm.id === methodId
+          pm.isDefault = pm.id === methodId;
         }
-      })
+      });
       saveToStorage("nexus_paymentMethods", methods);
       return true;
     } catch (error) {
       console.error(`Error setting default payment method:`, error);
       return false;
-
     }
   },
 
   // Get usage report
-  getUsageReport: (teamId: string, periodStart: string, periodEnd: string): UsageReport | undefined => {
+  getUsageReport: (
+    teamId: string,
+    periodStart: string,
+    periodEnd: string,
+  ): UsageReport | undefined => {
     try {
-      const reports = loadFromStorage<UsageReport[]>("nexus_usageReports", mockUsageReports);
-      return reports.find(report =>
-        report.teamId === teamId &&
-        report.periodStart === periodStart &&
-        report.periodEnd && periodEnd
-      )
+      const reports = loadFromStorage<UsageReport[]>(
+        "nexus_usageReports",
+        mockUsageReports,
+      );
+      return reports.find(
+        (report) =>
+          report.teamId === teamId &&
+          report.periodStart === periodStart &&
+          report.periodEnd &&
+          periodEnd,
+      );
     } catch (error) {
       console.error("Error fetching usage report:", error);
       return undefined;
-
     }
   },
 
   // Get billing summary
   getBillingSummary: (): BillingSummary => {
     try {
-      return loadFromStorage<BillingSummary>("nexus_billingSummary", mockBillingSummary);
+      return loadFromStorage<BillingSummary>(
+        "nexus_billingSummary",
+        mockBillingSummary,
+      );
     } catch (error) {
       console.error("Error fetching billing summary:", error);
       return mockBillingSummary;
     }
-
-  }
+  },
 };
-
 
 // API CLIENT (Mock/Real Switch)
 
@@ -1624,7 +1687,10 @@ export const apiClient = {
       : Promise.reject(new Error("API not configured"));
   },
 
-  updateUser: (id: string, updates: Partial<User>): Promise<User | undefined> => {
+  updateUser: (
+    id: string,
+    updates: Partial<User>,
+  ): Promise<User | undefined> => {
     return isMockMode
       ? mockify(() => mockApi.updateUser(id, updates))
       : Promise.resolve(undefined);
@@ -1654,7 +1720,10 @@ export const apiClient = {
       : Promise.reject(new Error("API not configured"));
   },
 
-  updateTeam: (id: string, updates: Partial<Team>): Promise<Team | undefined> => {
+  updateTeam: (
+    id: string,
+    updates: Partial<Team>,
+  ): Promise<Team | undefined> => {
     return isMockMode
       ? mockify(() => mockApi.updateTeam(id, updates))
       : Promise.resolve(undefined);
@@ -1678,13 +1747,18 @@ export const apiClient = {
       : Promise.resolve(undefined);
   },
 
-  addProvider: (provider: Omit<Provider, "id" | "createdAt">): Promise<Provider> => {
+  addProvider: (
+    provider: Omit<Provider, "id" | "createdAt">,
+  ): Promise<Provider> => {
     return isMockMode
       ? mockify(() => mockApi.addProvider(provider))
       : Promise.reject(new Error("API not configured"));
   },
 
-  updateProvider: (id: string, updates: Partial<Provider>): Promise<Provider | undefined> => {
+  updateProvider: (
+    id: string,
+    updates: Partial<Provider>,
+  ): Promise<Provider | undefined> => {
     return isMockMode
       ? mockify(() => mockApi.updateProvider(id, updates))
       : Promise.resolve(undefined);
@@ -1720,13 +1794,19 @@ export const apiClient = {
       : Promise.reject(new Error("API not configured"));
   },
 
-  removeProviderFromTeam: (teamId: string, providerId: string): Promise<boolean> => {
+  removeProviderFromTeam: (
+    teamId: string,
+    providerId: string,
+  ): Promise<boolean> => {
     return isMockMode
       ? mockify(() => mockApi.removeProviderFromTeam(teamId, providerId))
       : Promise.resolve(true);
   },
 
-  toggleTeamProvider: (teamId: string, providerId: string): Promise<TeamProvider | undefined> => {
+  toggleTeamProvider: (
+    teamId: string,
+    providerId: string,
+  ): Promise<TeamProvider | undefined> => {
     return isMockMode
       ? mockify(() => mockApi.toggleTeamProvider(teamId, providerId))
       : Promise.resolve(undefined);
@@ -1764,9 +1844,6 @@ export const apiClient = {
 
   isMockMode: (): boolean => isMockMode,
 
-
-
-
   // AUDIT LOGS
   getAuditLogs: (): Promise<AuditLog[]> => {
     return isMockMode
@@ -1774,42 +1851,42 @@ export const apiClient = {
       : Promise.resolve([]);
   },
 
-
   getAuditLogByUser: (userId: string): Promise<AuditLog[]> => {
-    return isMockMode ? mockify(() => mockApi.getAuditLogsByUsers(userId)) : Promise.resolve([])
+    return isMockMode
+      ? mockify(() => mockApi.getAuditLogsByUsers(userId))
+      : Promise.resolve([]);
   },
 
   getAuditLogsByAction: (action: AuditAction): Promise<AuditLog[]> => {
-    return isMockMode ? mockify(() => mockApi.getAuditLogsByAction(action)) : Promise.resolve([])
+    return isMockMode
+      ? mockify(() => mockApi.getAuditLogsByAction(action))
+      : Promise.resolve([]);
   },
 
-
   addAuditLog: (log: Omit<AuditLog, "id" | "createdAt">): Promise<AuditLog> => {
-    return isMockMode ? mockify(() => mockApi.addAuditLog(log))
-      : Promise.reject(new Error("API not configured"))
+    return isMockMode
+      ? mockify(() => mockApi.addAuditLog(log))
+      : Promise.reject(new Error("API not configured"));
   },
 
   getRecentAuditLogs: (limit: number = 5): Promise<AuditLog[]> => {
-
-    return isMockMode ? mockify(() => mockApi.getRecentAuditLogs(limit)) : Promise.resolve([])
-
+    return isMockMode
+      ? mockify(() => mockApi.getRecentAuditLogs(limit))
+      : Promise.resolve([]);
   },
-
-
 
   // API Calls Logs
 
   getAPICallLogs: (): Promise<APICallLog[]> => {
     return isMockMode
       ? mockify(() => mockApi.getAPICallLogs())
-      : Promise.resolve([])
+      : Promise.resolve([]);
   },
 
   getAPICallLogsByTeam: (teamId: string): Promise<APICallLog[]> => {
     return isMockMode
       ? mockify(() => mockApi.getAPICallLogsByTeam(teamId))
-      : Promise.resolve([])
-
+      : Promise.resolve([]);
   },
 
   getAPICallLogsByProvider: (providerId: string): Promise<APICallLog[]> => {
@@ -1818,23 +1895,24 @@ export const apiClient = {
       : Promise.resolve([]);
   },
 
-  addAPICallLogs: (log: Omit<APICallLog, "id" | "createdAt">): Promise<APICallLog> => {
+  addAPICallLogs: (
+    log: Omit<APICallLog, "id" | "createdAt">,
+  ): Promise<APICallLog> => {
     return isMockMode
       ? mockify(() => mockApi.addAPICallLog(log))
       : Promise.reject(new Error("API not configured"));
-
   },
 
   getAnalyticsStats: (): Promise<AnalyticsStats> => {
     return isMockMode
       ? mockify(() => mockApi.getAnalyticsStats())
       : Promise.resolve({
-        totalCalls: 0,
-        totalTokens: 0,
-        totalCost: 0,
-        avgResponseTime: 0,
-        successRate: 0,
-      });
+          totalCalls: 0,
+          totalTokens: 0,
+          totalCost: 0,
+          avgResponseTime: 0,
+          successRate: 0,
+        });
   },
 
   getProviderAnalytics: (): Promise<ProviderAnalytics[]> => {
@@ -1863,10 +1941,13 @@ export const apiClient = {
       : Promise.resolve(undefined);
   },
 
-  updateBudget: (teamId: string, update: Partial<TeamBudget>): Promise<TeamBudget | undefined> => {
+  updateBudget: (
+    teamId: string,
+    update: Partial<TeamBudget>,
+  ): Promise<TeamBudget | undefined> => {
     return isMockMode
       ? mockify(() => mockApi.updateBudget(teamId, update))
-      : Promise.resolve(undefined)
+      : Promise.resolve(undefined);
   },
 
   resetMonthlyBudgets: (): Promise<TeamBudget[]> => {
@@ -1893,8 +1974,6 @@ export const apiClient = {
       : Promise.resolve(undefined);
   },
 
-
-
   // PROVIDER HEALTH
 
   getProviderHealth: (): Promise<ProviderHealth[]> => {
@@ -1903,13 +1982,18 @@ export const apiClient = {
       : Promise.resolve([]);
   },
 
-  getProviderHealthById: (providerId: string): Promise<ProviderHealth | undefined> => {
+  getProviderHealthById: (
+    providerId: string,
+  ): Promise<ProviderHealth | undefined> => {
     return isMockMode
       ? mockify(() => mockApi.getProviderHealthById(providerId))
       : Promise.resolve(undefined);
   },
 
-  updateProviderHealth: (providerId: string, updates: Partial<ProviderHealth>): Promise<ProviderHealth | undefined> => {
+  updateProviderHealth: (
+    providerId: string,
+    updates: Partial<ProviderHealth>,
+  ): Promise<ProviderHealth | undefined> => {
     return isMockMode
       ? mockify(() => mockApi.updateProviderHealth(providerId, updates))
       : Promise.resolve(undefined);
@@ -1927,7 +2011,10 @@ export const apiClient = {
       : Promise.resolve([]);
   },
 
-  updateFallbackConfig: (providerId: string, config: Partial<ProviderFallbackConfig>): Promise<ProviderFallbackConfig | undefined> => {
+  updateFallbackConfig: (
+    providerId: string,
+    config: Partial<ProviderFallbackConfig>,
+  ): Promise<ProviderFallbackConfig | undefined> => {
     return isMockMode
       ? mockify(() => mockApi.updateFallbackConfig(providerId, config))
       : Promise.resolve(undefined);
@@ -1939,102 +2026,117 @@ export const apiClient = {
       : Promise.resolve(undefined);
   },
 
-
   // MFA
   generateTOTPSecret: (userId: string): Promise<MFASetupResponse> => {
-    return isMockMode ? mockify(() => mockApi.generateTOTPSecret(userId))
+    return isMockMode
+      ? mockify(() => mockApi.generateTOTPSecret(userId))
       : Promise.reject(new Error("API not configured"));
   },
 
   verifyMFACode: (userId: string, code: string): Promise<boolean> => {
-    return isMockMode ? mockify(() => mockApi.verifyMFACode(userId, code))
-      : Promise.resolve(false)
+    return isMockMode
+      ? mockify(() => mockApi.verifyMFACode(userId, code))
+      : Promise.resolve(false);
   },
   disableMFA: (userId: string): Promise<boolean> => {
-    return isMockMode ? mockify(() => mockApi.disableMFA(userId))
-      : Promise.resolve(false)
+    return isMockMode
+      ? mockify(() => mockApi.disableMFA(userId))
+      : Promise.resolve(false);
   },
   getMFAConfig: (userId: string): Promise<MFAConfig | undefined> => {
-    return isMockMode ? mockify(() => mockApi.getMFAConfig(userId))
-      : Promise.resolve(undefined)
+    return isMockMode
+      ? mockify(() => mockApi.getMFAConfig(userId))
+      : Promise.resolve(undefined);
   },
 
   regenerateBackupCodes: (userId: string): Promise<string[]> => {
-    return isMockMode ? mockify(() => mockApi.regenerateBackupCodes(userId))
-      : Promise.resolve([])
+    return isMockMode
+      ? mockify(() => mockApi.regenerateBackupCodes(userId))
+      : Promise.resolve([]);
   },
 
   // Login History
   getLoginHistory: (userId?: string): Promise<LoginHistory[]> => {
-    return isMockMode ? mockify(() => mockApi.getLoginHistory(userId))
-      : Promise.resolve([])
-
+    return isMockMode
+      ? mockify(() => mockApi.getLoginHistory(userId))
+      : Promise.resolve([]);
   },
 
-  addLoginHistory: (entry: Omit<LoginHistory, "id" | "createdAt">): Promise<LoginHistory> => {
-    return isMockMode ? mockify(() => mockApi.addLoginHistory(entry))
-      : Promise.reject(new Error("API not configured"))
+  addLoginHistory: (
+    entry: Omit<LoginHistory, "id" | "createdAt">,
+  ): Promise<LoginHistory> => {
+    return isMockMode
+      ? mockify(() => mockApi.addLoginHistory(entry))
+      : Promise.reject(new Error("API not configured"));
   },
 
   // Sessions
   getSessions: (userId: string): Promise<Session[]> => {
-    return isMockMode ? mockify(() => mockApi.getSessions(userId))
-      : Promise.resolve([])
+    return isMockMode
+      ? mockify(() => mockApi.getSessions(userId))
+      : Promise.resolve([]);
   },
 
   addSession: (session: Omit<Session, "createdAt">): Promise<Session> => {
-    return isMockMode ? mockify(() => mockApi.addSesion(session))
-      : Promise.reject(new Error("API not configured"))
+    return isMockMode
+      ? mockify(() => mockApi.addSesion(session))
+      : Promise.reject(new Error("API not configured"));
   },
   revokeSession: (userId: string, deviceId: string): Promise<boolean> => {
-    return isMockMode ? mockify(() => mockApi.revokeSession(userId, deviceId))
+    return isMockMode
+      ? mockify(() => mockApi.revokeSession(userId, deviceId))
       : Promise.resolve(false);
   },
 
   revokeAllSessions: (userId: string): Promise<boolean> => {
-    return isMockMode ? mockify(() => mockApi.revokeAllSessions(userId))
-      : Promise.resolve(false)
+    return isMockMode
+      ? mockify(() => mockApi.revokeAllSessions(userId))
+      : Promise.resolve(false);
   },
   // Password Policy
   getPasswordPolicy: (): Promise<PasswordPolicy> => {
-
-    return isMockMode ? mockify(() => mockApi.getPasswordPolicy())
+    return isMockMode
+      ? mockify(() => mockApi.getPasswordPolicy())
       : Promise.resolve({
-        minLength: 8,
-        requireLowercase: true,
-        requireUppercase: true,
-        requireNumber: true,
-        requireSpecialChar: true,
-        maxAgeDays: 90,
-        preventReuse: 5
-      })
+          minLength: 8,
+          requireLowercase: true,
+          requireUppercase: true,
+          requireNumber: true,
+          requireSpecialChar: true,
+          maxAgeDays: 90,
+          preventReuse: 5,
+        });
   },
 
   updatePasswordPolicy: (policy: PasswordPolicy): Promise<PasswordPolicy> => {
-    return isMockMode ? mockify(() => mockApi.updatePasswordPolicy(policy))
-      : Promise.reject(new Error("API not configured"))
+    return isMockMode
+      ? mockify(() => mockApi.updatePasswordPolicy(policy))
+      : Promise.reject(new Error("API not configured"));
   },
 
   // Billing
   getInvoice: (teamId?: string): Promise<Invoice[]> => {
     return isMockMode
       ? mockify(() => mockApi.getInvoices(teamId))
-      : Promise.resolve([])
+      : Promise.resolve([]);
   },
   getInvoiceById: (invoceId: string): Promise<Invoice | undefined> => {
-
     return isMockMode
       ? mockify(() => mockApi.getInvoiceById(invoceId))
       : Promise.resolve(undefined);
   },
 
-  createInvoice: (invoice: Omit<Invoice, "id" | "createdAt">): Promise<Invoice> => {
+  createInvoice: (
+    invoice: Omit<Invoice, "id" | "createdAt">,
+  ): Promise<Invoice> => {
     return isMockMode
       ? mockify(() => mockApi.createInvoice(invoice))
       : Promise.reject(new Error("API not configured"));
-
   },
-  payInvoice: (invoiceId: string, paymentMethod?: string): Promise<Invoice | undefined> => {
+  payInvoice: (
+    invoiceId: string,
+    paymentMethod?: string,
+  ): Promise<Invoice | undefined> => {
     return isMockMode
       ? mockify(() => mockApi.payInvoice(invoiceId, paymentMethod))
       : Promise.resolve(undefined);
@@ -2045,7 +2147,9 @@ export const apiClient = {
       : Promise.resolve([]);
   },
 
-  addPaymentMethod: (method: Omit<PaymentMethod, 'id' | 'createdAt'>): Promise<PaymentMethod> => {
+  addPaymentMethod: (
+    method: Omit<PaymentMethod, "id" | "createdAt">,
+  ): Promise<PaymentMethod> => {
     return isMockMode
       ? mockify(() => mockApi.addPaymentMethod(method))
       : Promise.reject(new Error("API not configured"));
@@ -2055,12 +2159,19 @@ export const apiClient = {
       ? mockify(() => mockApi.removePaymentMethod(methodId))
       : Promise.resolve(false);
   },
-  setDefaultPaymentMethod: (teamId: string, methodId: string): Promise<boolean> => {
+  setDefaultPaymentMethod: (
+    teamId: string,
+    methodId: string,
+  ): Promise<boolean> => {
     return isMockMode
       ? mockify(() => mockApi.setDefaultPaymentMethod(teamId, methodId))
       : Promise.resolve(false);
   },
-  getUsageReport: (teamId: string, periodStart: string, periodEnd: string): Promise<UsageReport | undefined> => {
+  getUsageReport: (
+    teamId: string,
+    periodStart: string,
+    periodEnd: string,
+  ): Promise<UsageReport | undefined> => {
     return isMockMode
       ? mockify(() => mockApi.getUsageReport(teamId, periodStart, periodEnd))
       : Promise.resolve(undefined);
@@ -2069,15 +2180,12 @@ export const apiClient = {
     return isMockMode
       ? mockify(() => mockApi.getBillingSummary())
       : Promise.resolve({
-        totalInvoices: 0,
-        paidInvoices: 0,
-        pendingInvoices: 0,
-        overdueInvoices: 0,
-        totalRevenue: 0,
-        averageInvoiceAmount: 0,
-      })
-  }
+          totalInvoices: 0,
+          paidInvoices: 0,
+          pendingInvoices: 0,
+          overdueInvoices: 0,
+          totalRevenue: 0,
+          averageInvoiceAmount: 0,
+        });
+  },
 };
-
-
-

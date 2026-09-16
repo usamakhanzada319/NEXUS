@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Home, ArrowLeft, Search, AlertTriangle } from "lucide-react";
+import { Home, ArrowLeft, AlertTriangle } from "lucide-react";
 
 export const NotFound: React.FC = () => {
   const navigate = useNavigate();

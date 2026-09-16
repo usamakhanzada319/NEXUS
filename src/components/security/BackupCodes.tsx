@@ -1,24 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { useNotification } from "../../context/NotificationContext";
 import { apiClient } from "../../api/client";
-
 import { Key, RefreshCw, CheckCircle, Copy } from "lucide-react";
 
-interface backupCodesProps {
+interface BackupCodesProps {
   userId: string;
 }
 
-export const BackupCodes: React.FC<backupCodesProps> = ({ userId }) => {
+export const BackupCodes: React.FC<BackupCodesProps> = ({ userId }) => {
   const { addNotification } = useNotification();
-
   const [codes, setCodes] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRegenerating, setIsRegenerating] = useState(false);
 
-  useEffect(() => {
-    loadBackupCodes();
-  }, [userId]);
-
+  // ✅ Circular reference fix — function useEffect se pehle
   const loadBackupCodes = async () => {
     setIsLoading(true);
     try {
@@ -32,6 +27,10 @@ export const BackupCodes: React.FC<backupCodesProps> = ({ userId }) => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadBackupCodes();
+  }, [userId]);
 
   const handleRegenerate = async () => {
     if (
@@ -59,6 +58,7 @@ export const BackupCodes: React.FC<backupCodesProps> = ({ userId }) => {
     navigator.clipboard.writeText(codes.join("\n"));
     addNotification("Backup codes copied to clipboard!", "success");
   };
+
   if (isLoading) {
     return (
       <div className="text-center py-8 text-muted-foreground">
@@ -121,6 +121,7 @@ export const BackupCodes: React.FC<backupCodesProps> = ({ userId }) => {
           </div>
         ))}
       </div>
+
       <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
         <p className="text-sm text-yellow-700 dark:text-yellow-400">
           Store these backup codes in a safe place. Each code can only be used

@@ -1,14 +1,14 @@
 import React, {
   createContext,
-  useContext,
   useState,
   useEffect,
   ReactNode,
+  useCallback,
 } from "react";
 import { TeamBudget, BudgetAlert } from "../types";
 import { apiClient } from "../api/client";
 
-interface BudgetContextType {
+export interface BudgetContextType {
   budgets: TeamBudget[];
   alerts: BudgetAlert[];
   isLoading: boolean;
@@ -20,7 +20,9 @@ interface BudgetContextType {
   overallPercent: number;
 }
 
-const BudgetContext = createContext<BudgetContextType | undefined>(undefined);
+export const BudgetContext = createContext<BudgetContextType | undefined>(
+  undefined,
+);
 
 export const BudgetProvider: React.FC<{ children: ReactNode }> = ({
   children,
@@ -29,7 +31,7 @@ export const BudgetProvider: React.FC<{ children: ReactNode }> = ({
   const [alerts, setAlerts] = useState<BudgetAlert[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const refreshBudgets = async () => {
+  const refreshBudgets = useCallback(async () => {
     setIsLoading(true);
     try {
       const [budgetsData, alertsData] = await Promise.all([
@@ -43,25 +45,28 @@ export const BudgetProvider: React.FC<{ children: ReactNode }> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const updateBudget = async (teamId: string, updates: Partial<TeamBudget>) => {
-    try {
-      const updated = await apiClient.updateBudget(teamId, updates);
-      if (updated) {
-        setBudgets((prev) =>
-          prev.map((b) => (b.teamId === teamId ? updated : b)),
-        );
-        const alertsData = await apiClient.getUnresolvedBudgetAlerts();
-        setAlerts(alertsData);
+  const updateBudget = useCallback(
+    async (teamId: string, updates: Partial<TeamBudget>) => {
+      try {
+        const updated = await apiClient.updateBudget(teamId, updates);
+        if (updated) {
+          setBudgets((prev) =>
+            prev.map((b) => (b.teamId === teamId ? updated : b)),
+          );
+          const alertsData = await apiClient.getUnresolvedBudgetAlerts();
+          setAlerts(alertsData);
+        }
+      } catch (error) {
+        console.error("Failed to update budget:", error);
+        throw error;
       }
-    } catch (error) {
-      console.error("Failed to update budget:", error);
-      throw error;
-    }
-  };
+    },
+    [],
+  );
 
-  const resolveAlert = async (id: string) => {
+  const resolveAlert = useCallback(async (id: string) => {
     try {
       await apiClient.resolveBudgetAlert(id);
       setAlerts((prev) => prev.filter((a) => a.id !== id));
@@ -69,10 +74,12 @@ export const BudgetProvider: React.FC<{ children: ReactNode }> = ({
       console.error("Failed to resolve alert:", error);
       throw error;
     }
-  };
+  }, []);
+
+  // Initial load
   useEffect(() => {
     refreshBudgets();
-  }, []);
+  }, [refreshBudgets]);
 
   const totalBudget = budgets.reduce((sum, b) => sum + b.monthlyLimit, 0);
   const totalSpend = budgets.reduce((sum, b) => sum + b.currentMonthSpend, 0);
@@ -95,12 +102,4 @@ export const BudgetProvider: React.FC<{ children: ReactNode }> = ({
       {children}
     </BudgetContext.Provider>
   );
-};
-
-export const useBudget = () => {
-  const context = useContext(BudgetContext);
-  if (!context) {
-    throw new Error("useBudget must be used within a BudgetProvider");
-  }
-  return context;
 };

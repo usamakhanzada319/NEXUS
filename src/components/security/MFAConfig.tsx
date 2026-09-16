@@ -17,10 +17,6 @@ export const MFAConfig: React.FC<MFAConfigProps> = ({ userId }) => {
   const [verificationCode, setVerificationCode] = useState("");
   const [isSettingUp, setIsSettingUp] = useState(false);
 
-  useEffect(() => {
-    loadMFAConfig();
-  }, []);
-
   const loadMFAConfig = async () => {
     setIsLoading(true);
     try {
@@ -38,8 +34,12 @@ export const MFAConfig: React.FC<MFAConfigProps> = ({ userId }) => {
     }
   };
 
+  useEffect(() => {
+    loadMFAConfig();
+  }, [userId]);
+
   const handleSetup = async () => {
-    setIsLoading(true);
+    setIsSettingUp(true);
     try {
       const response = await apiClient.generateTOTPSecret(userId);
       setQrCode(response.qrCode);
@@ -53,7 +53,7 @@ export const MFAConfig: React.FC<MFAConfigProps> = ({ userId }) => {
       console.error("Failed to setup MFA:", error);
       addNotification("Failed to setup MFA", "error");
     } finally {
-      setIsLoading(false);
+      setIsSettingUp(false);
     }
   };
 
@@ -80,6 +80,7 @@ export const MFAConfig: React.FC<MFAConfigProps> = ({ userId }) => {
       addNotification("Failed to verify MFA", "error");
     }
   };
+
   const handleDisable = async () => {
     if (
       !confirm(
@@ -102,6 +103,7 @@ export const MFAConfig: React.FC<MFAConfigProps> = ({ userId }) => {
       addNotification("Failed to disable MFA", "error");
     }
   };
+
   if (isLoading) {
     return (
       <div className="text-center py-8 text-muted-foreground">
@@ -109,6 +111,7 @@ export const MFAConfig: React.FC<MFAConfigProps> = ({ userId }) => {
       </div>
     );
   }
+
   if (isEnabled) {
     return (
       <div className="space-y-4">
@@ -139,6 +142,7 @@ export const MFAConfig: React.FC<MFAConfigProps> = ({ userId }) => {
             </div>
           </div>
         )}
+
         <button
           onClick={handleDisable}
           className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
@@ -148,6 +152,7 @@ export const MFAConfig: React.FC<MFAConfigProps> = ({ userId }) => {
       </div>
     );
   }
+
   if (qrCode && secret) {
     return (
       <div className="space-y-6">
@@ -161,14 +166,16 @@ export const MFAConfig: React.FC<MFAConfigProps> = ({ userId }) => {
             Scan this QR code with Google Authenticator or similar app.
           </p>
         </div>
+
         <div>
           <label className="block text-sm font-medium mb-1">
             Secret key (if QR code doesn't work)
           </label>
-          <div className="font-mono text-sm bg-gray-50 dark:bg-gray-800 p-3 rounded break-all ">
+          <div className="font-mono text-sm bg-gray-50 dark:bg-gray-800 p-3 rounded break-all">
             {secret}
           </div>
         </div>
+
         <div>
           <label className="block text-sm font-medium mb-1">
             Enter 6-digit verification code
@@ -196,9 +203,9 @@ export const MFAConfig: React.FC<MFAConfigProps> = ({ userId }) => {
 
   return (
     <div className="space-y-4 text-center py-8">
-      <Shield className="h-16 w-16 max-auto text-muted-foreground " />
+      <Shield className="h-16 w-16 mx-auto text-muted-foreground" />
       <h3 className="text-lg font-semibold">Secure your account with MFA</h3>
-      <p className="text-sm text-muted-foreground max-w-md max-auto">
+      <p className="text-sm text-muted-foreground max-w-md mx-auto">
         Add an extra layer of security to your account by enabling two-factor
         authentication.
       </p>
@@ -208,11 +215,9 @@ export const MFAConfig: React.FC<MFAConfigProps> = ({ userId }) => {
         disabled={isSettingUp}
         className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors disabled:opacity-50"
       >
-        {
-          <RefreshCw
-            className={`h-4 w-4 inline mr-2 ${isSettingUp ? "animate-spin" : ""}`}
-          />
-        }
+        <RefreshCw
+          className={`h-4 w-4 inline mr-2 ${isSettingUp ? "animate-spin" : ""}`}
+        />
         {isSettingUp ? "Setting up..." : "Enable MFA"}
       </button>
     </div>
