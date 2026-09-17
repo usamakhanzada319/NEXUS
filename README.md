@@ -156,7 +156,7 @@ Usama Jameel
 
 GitHub: @usamakhanzada319
 
-LinkedIn: https://www.linkedin.com/in/usama-jamil-b23a36202/
+LinkedIn: https://nexus-pink-iota-44.vercel.app/
 ---
 
 
